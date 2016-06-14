@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QX11Info>
 #include <QProcess>
+#include <QTimer>
+#include <QDateTime>
 
 #include <X11/Xlib.h>
 
