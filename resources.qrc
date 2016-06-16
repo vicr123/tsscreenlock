@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>downarrowlight.svg</file>
+        <file>uparrowlight.svg</file>
+    </qresource>
+</RCC>

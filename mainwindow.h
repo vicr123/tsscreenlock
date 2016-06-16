@@ -6,6 +6,11 @@
 #include <QProcess>
 #include <QTimer>
 #include <QDateTime>
+#include <QDesktopWidget>
+#include <QPropertyAnimation>
+#include <QMouseEvent>
+#include <QDBusMessage>
+#include <QDBusConnection>
 
 #include <X11/Xlib.h>
 
@@ -26,8 +31,32 @@ private slots:
 
     void on_lineEdit_returnPressed();
 
+    void on_Cover_clicked();
+
+    void on_Cover_MouseDown(QMouseEvent *);
+
+    void on_Cover_MouseMove(QMouseEvent *);
+
+    void on_Cover_MouseUp(QMouseEvent *);
+
+    void hideCover();
+
+    void showCover();
+
+    void on_lineEdit_textEdited(const QString &arg1);
+
+    void on_pushButton_3_clicked();
+
+    void on_pushButton_4_clicked();
+
 private:
     Ui::MainWindow *ui;
+
+    void resizeEvent(QResizeEvent* event);
+    void keyPressEvent(QKeyEvent* event);
+
+    int moveY;
+    bool typePassword = false;
 };
 
 #endif // MAINWINDOW_H

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui x11extras
+QT       += core gui x11extras dbus
 CONFIG   += c++11
 LIBS     += -lxcb -lX11
 
@@ -15,8 +15,13 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    coverframe.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    coverframe.h
 
 FORMS    += mainwindow.ui
+
+RESOURCES += \
+    resources.qrc
