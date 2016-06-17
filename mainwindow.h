@@ -11,6 +11,7 @@
 #include <QMouseEvent>
 #include <QDBusMessage>
 #include <QDBusConnection>
+#include <QSettings>
 
 #include <X11/Xlib.h>
 
@@ -49,6 +50,8 @@ private slots:
 
     void on_pushButton_4_clicked();
 
+    void on_goBack_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -57,6 +60,8 @@ private:
 
     int moveY;
     bool typePassword = false;
+    QSize imageSize;
+
 };
 
 #endif // MAINWINDOW_H

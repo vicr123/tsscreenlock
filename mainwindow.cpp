@@ -45,8 +45,58 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->dateLabel_2->setText(QDateTime::currentDateTime().toString("ddd dd MMM yyyy"));
     ui->timeLabel_2->setText(QDateTime::currentDateTime().toString("hh:mm:ss"));
 
-    ui->downArrow->setPixmap(QIcon(":/icons/downarrowlight.svg").pixmap(32, 32));
-    ui->upArrow->setPixmap(QIcon(":/icons/uparrowlight.svg").pixmap(32, 32));
+
+    QSettings settings;
+    QString background = settings.value("background", "/usr/share/icons/theos/backgrounds/triangle/1920x1080.png").toString();
+    QPixmap backgroundImage(background);
+    imageSize = backgroundImage.size();
+
+    QImage image(background);
+    QList<bool> lightOrDark;
+    for (int w = 0; w < image.width(); w++) {
+        for (int h = 0; h < image.height(); h++) {
+            QColor col = image.pixelColor(w, h);
+            int grey = (col.red() + col.green() + col.blue()) / 3;
+            if (grey > 127) {
+                lightOrDark.append(true);
+            } else {
+                lightOrDark.append(false);
+            }
+        }
+    }
+
+    QPalette pal;
+    if (lightOrDark.count(true) <= lightOrDark.count() / 2) {
+        pal.setColor(QPalette::WindowText, QColor::fromRgb(255, 255, 255));
+        ui->downArrow->setPixmap(QIcon(":/icons/downarrowlight.svg").pixmap(32, 32));
+        ui->upArrow->setPixmap(QIcon(":/icons/uparrowlight.svg").pixmap(32, 32));
+    } else {
+        pal.setColor(QPalette::WindowText, QColor::fromRgb(0, 0, 0));
+        ui->downArrow->setPixmap(QIcon(":/icons/downarrowdark.svg").pixmap(32, 32));
+        ui->upArrow->setPixmap(QIcon(":/icons/uparrowdark.svg").pixmap(32, 32));
+    }
+    ui->Cover->setPalette(pal);
+    ui->dateLabel_2->setPalette(pal);
+    ui->timeLabel_2->setPalette(pal);
+
+    ui->ImageLabel->setParent(ui->Cover);
+    ui->ImageLabel->setPixmap(backgroundImage);
+    ui->ImageLabel->setGeometry(0, 0, this->width(), this->height());
+    ui->ImageLabel->lower();
+
+    /*ui->Cover->setStyleSheet("QWidget#Cover {"
+                             "background: url(\"" + background + "\");"
+                             "background-position: center;"
+                             "}");*/
+
+    QProcess* tscheckpass = new QProcess();
+    tscheckpass->start("tscheckpass " + name);
+    tscheckpass->waitForFinished();
+    if (tscheckpass->exitCode() == 0) {
+        ui->lockFrame->setVisible(false);
+        ui->pushButton_3->setVisible(false);
+        ui->pushButton_4->setVisible(false);
+    }
 }
 
 MainWindow::~MainWindow()
@@ -58,6 +108,16 @@ MainWindow::~MainWindow()
 
 void MainWindow::resizeEvent(QResizeEvent *event) {
     ui->Cover->setGeometry(0, 0, this->width(), this->height());
+
+    if (imageSize.width() < imageSize.height()) {
+        ui->ImageLabel->resize(this->width(), this->width() / ((float) imageSize.width() / (float) imageSize.height()));
+        ui->ImageLabel->move(0, this->height() / 2 - ui->ImageLabel->height() / 2);
+    } else {
+        ui->ImageLabel->resize(this->height() * ((float) imageSize.width() / (float) imageSize.height()), this->height());
+        ui->ImageLabel->move(this->width() / 2 - ui->ImageLabel->width() / 2, 0);
+    }
+
+    //ui->ImageLabel->setGeometry(0, 0, this->width(), this->height());
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
@@ -142,7 +202,21 @@ void MainWindow::hideCover() {
         animation->setDuration(500);
         animation->setEasingCurve(QEasingCurve::OutCubic);
         animation->start();
+        connect(animation, &QPropertyAnimation::finished, [=]() {
+            QString name = qgetenv("USER");
+            if (name.isEmpty()) {
+                name = qgetenv("USERNAME");
+            }
+
+            QProcess* tscheckpass = new QProcess();
+            tscheckpass->start("tscheckpass " + name);
+            tscheckpass->waitForFinished();
+            if (tscheckpass->exitCode() == 0) {
+                QApplication::exit(0);
+            }
+        });
         typePassword = true;
+        ui->lineEdit->setFocus();
     }
 }
 
@@ -155,12 +229,14 @@ void MainWindow::showCover() {
         animation->setEasingCurve(QEasingCurve::OutCubic);
         animation->start();
         typePassword = false;
+        ui->lineEdit->setText("");
+        ui->lineEdit->setFocus();
     }
 }
 
 void MainWindow::on_lineEdit_textEdited(const QString &arg1)
 {
-    if (typePassword) {
+    if (!typePassword) {
         hideCover();
     }
 }
@@ -180,4 +256,9 @@ void MainWindow::on_pushButton_4_clicked()
     QDBusMessage message = QDBusMessage::createMethodCall("org.freedesktop.login1", "/org/freedesktop/login1", "org.freedesktop.login1.Manager", "Suspend");
     message.setArguments(arguments);
     QDBusConnection::systemBus().send(message);
+}
+
+void MainWindow::on_goBack_clicked()
+{
+    showCover();
 }

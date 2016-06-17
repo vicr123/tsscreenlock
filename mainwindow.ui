@@ -116,6 +116,19 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
+          <widget class="QPushButton" name="goBack">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset theme="go-previous"/>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer_3">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -269,14 +282,14 @@
     </item>
     <item row="5" column="0" colspan="3">
      <widget class="CoverFrame" name="Cover">
+      <property name="autoFillBackground">
+       <bool>true</bool>
+      </property>
       <property name="styleSheet">
-       <string notr="true">QWidget#Cover {
-	background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 0, 0, 127), stop:1 rgba(0, 0, 0, 127)), url(&quot;/usr/share/icons/theos/backgrounds/triangle/1920x1080.png&quot;);
-	background-position: cover;
-}</string>
+       <string notr="true"/>
       </property>
       <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
+       <enum>QFrame::NoFrame</enum>
       </property>
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
@@ -408,6 +421,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QLabel" name="ImageLabel">
+            <property name="text">
+             <string>Image</string>
+            </property>
+            <property name="scaledContents">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -454,7 +477,8 @@
           <string>Suspend</string>
          </property>
          <property name="icon">
-          <iconset theme="system-suspend"/>
+          <iconset theme="system-suspend">
+           <normaloff>.</normaloff>.</iconset>
          </property>
          <property name="flat">
           <bool>true</bool>
@@ -467,7 +491,8 @@
           <string>Turn Off Screen</string>
          </property>
          <property name="icon">
-          <iconset theme="video-display"/>
+          <iconset theme="video-display">
+           <normaloff>.</normaloff>.</iconset>
          </property>
          <property name="flat">
           <bool>true</bool>
