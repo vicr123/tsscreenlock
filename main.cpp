@@ -16,7 +16,8 @@ int main(int argc, char *argv[])
     for (int i = 0; i < a.desktop()->screenCount(); i++) {
         MainWindow* w = new MainWindow();
         w->show();
-        w->move(a.desktop()->screenGeometry(i).x(), a.desktop()->screenGeometry(i).y());
+        w->setGeometry(a.desktop()->screenGeometry(i));
+        //w->move(a.desktop()->screenGeometry(i).x(), a.desktop()->screenGeometry(i).y());
         w->showFullScreen();
     }
 
