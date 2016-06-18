@@ -84,6 +84,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->ImageLabel->setGeometry(0, 0, this->width(), this->height());
     ui->ImageLabel->lower();
 
+    ui->mprisFrame->setParent(this);
+    ui->mprisFrame->setGeometry(0, this->height() - ui->mprisFrame->height(), this->width(), ui->mprisFrame->sizeHint().height());
+    ui->mprisFrame->raise();
+
+    ui->mprisArt->setPixmap(QIcon::fromTheme("audio-generic").pixmap(32, 32));
+
     /*ui->Cover->setStyleSheet("QWidget#Cover {"
                              "background: url(\"" + background + "\");"
                              "background-position: center;"
@@ -97,6 +103,13 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->pushButton_3->setVisible(false);
         ui->pushButton_4->setVisible(false);
     }
+    delete tscheckpass;
+
+    QTimer* mprisTimer = new QTimer();
+    mprisTimer->setInterval(100);
+    connect(mprisTimer, SIGNAL(timeout()), this, SLOT(mprisCheckTimer()));
+    mprisTimer->start();
+    mprisCheckTimer();
 }
 
 MainWindow::~MainWindow()
@@ -106,22 +119,139 @@ MainWindow::~MainWindow()
     XUngrabPointer(QX11Info::display(), CurrentTime);
 }
 
-void MainWindow::resizeEvent(QResizeEvent *event) {
-    ui->Cover->setGeometry(0, 0, this->width(), this->height());
+void MainWindow::mprisCheckTimer() {
+    mprisDetectedApps.clear();
+    for (QString service : QDBusConnection::sessionBus().interface()->registeredServiceNames().value()) {
 
-    if (imageSize.width() < imageSize.height()) {
-        ui->ImageLabel->resize(this->width(), this->width() / ((float) imageSize.width() / (float) imageSize.height()));
-        ui->ImageLabel->move(0, this->height() / 2 - ui->ImageLabel->height() / 2);
-    } else {
-        ui->ImageLabel->resize(this->height() * ((float) imageSize.width() / (float) imageSize.height()), this->height());
-        ui->ImageLabel->move(this->width() / 2 - ui->ImageLabel->width() / 2, 0);
+        if (service.startsWith("org.mpris.MediaPlayer2.")) {
+            if (!mprisDetectedApps.contains(service)) {
+                mprisDetectedApps.append(service);
+                if (mprisCurrentAppName == "") {
+                    mprisCurrentAppName = service;
+                }
+            }
+        }
     }
 
+    if (mprisCurrentAppName != "") {
+        ui->mprisFrame->setVisible(true);
+        if (!mprisDetectedApps.contains(mprisCurrentAppName)) { //Service closed.
+            if (mprisDetectedApps.count() > 0) { //Set to next app
+                mprisCurrentAppName = mprisDetectedApps.first();
+                ui->mprisFrame->setVisible(true);
+                this->resizeSlot();
+            } else { //Set to no app. Make mpris controller invisible.
+                mprisCurrentAppName = "";
+                ui->mprisFrame->setVisible(false);
+                this->resizeSlot();
+            }
+        }
+    } else { //Make mpris controller invisible
+        ui->mprisFrame->setVisible(false);
+    }
+
+    if (ui->mprisFrame->isVisible()) {
+        //Get Current Song Metadata
+        QDBusMessage MetadataRequest = QDBusMessage::createMethodCall(mprisCurrentAppName, "/org/mpris/MediaPlayer2", "org.freedesktop.DBus.Properties", "Get");
+        MetadataRequest.setArguments(QList<QVariant>() << "org.mpris.MediaPlayer2.Player" << "Metadata");
+
+        QDBusReply<QDBusVariant> reply(QDBusConnection::sessionBus().call(MetadataRequest));
+        QVariantMap replyData;
+        QDBusArgument arg(reply.value().variant().value<QDBusArgument>());
+
+        arg >> replyData;
+
+        QString album = "";
+        QString artist = "";
+
+        if (replyData.contains("xesam:title")) {
+            ui->mprisSongName->setText(replyData.value("xesam:title").toString());
+        } else {
+            QDBusMessage IdentityRequest = QDBusMessage::createMethodCall(mprisCurrentAppName, "/org/mpris/MediaPlayer2", "org.freedesktop.DBus.Properties", "Get");
+            IdentityRequest.setArguments(QList<QVariant>() << "org.mpris.MediaPlayer2" << "Identity");
+
+            QDBusReply<QDBusVariant> reply(QDBusConnection::sessionBus().call(IdentityRequest));
+            ui->mprisSongName->setText(reply.value().variant().toString());
+        }
+
+        if (replyData.contains("xesam:artist")) {
+            QStringList artists = replyData.value("xesam:artist").toStringList();
+            for (QString art : artists) {
+                artist.append(art + ", ");
+            }
+            artist.remove(artist.length() - 2, 2);
+        }
+
+        if (replyData.contains("xesam:album")) {
+            album = replyData.value("xesam:album").toString();
+        }
+
+        if (artist == "" && album == "") {
+            ui->mprisSongArtist->setVisible(false);
+        } else if (artist != "" && album == ""){
+            ui->mprisSongArtist->setVisible(true);
+            ui->mprisSongArtist->setText(artist);
+        } else if (artist == "" && album != ""){
+            ui->mprisSongArtist->setVisible(true);
+            ui->mprisSongArtist->setText(album);
+        } else if (artist != "" && album != ""){
+            ui->mprisSongArtist->setVisible(true);
+            ui->mprisSongArtist->setText(artist + " · " + album);
+        }
+
+        //Get Playback Status
+        QDBusMessage PlayStatRequest = QDBusMessage::createMethodCall(mprisCurrentAppName, "/org/mpris/MediaPlayer2", "org.freedesktop.DBus.Properties", "Get");
+        PlayStatRequest.setArguments(QList<QVariant>() << "org.mpris.MediaPlayer2.Player" << "PlaybackStatus");
+        QDBusReply<QVariant> PlayStat = QDBusConnection::sessionBus().call(PlayStatRequest);
+        if (PlayStat.value().toString() == "Playing") {
+            ui->mprisPause->setIcon(QIcon::fromTheme("media-playback-pause"));
+        } else {
+            ui->mprisPause->setIcon(QIcon::fromTheme("media-playback-start"));
+
+        }
+
+    }
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event) {
+    this->resizeSlot();
     //ui->ImageLabel->setGeometry(0, 0, this->width(), this->height());
 }
 
+void MainWindow::resizeSlot() {
+    int height;
+    if (ui->mprisFrame->isVisible()) {
+        height = this->height() - ui->mprisFrame->height();
+        ui->paddingFrame->resize(this->width(), ui->mprisFrame->height());
+    } else {
+        height = this->height();
+        ui->paddingFrame->resize(this->width(), 0);
+    }
+    ui->Cover->setGeometry(0, 0, this->width(), height);
+
+    if (imageSize.width() < imageSize.height()) {
+        ui->ImageLabel->resize(this->width(), this->width() / ((float) imageSize.width() / (float) imageSize.height()));
+        ui->ImageLabel->move(0, height / 2 - ui->ImageLabel->height() / 2);
+    } else {
+        ui->ImageLabel->resize(height * ((float) imageSize.width() / (float) imageSize.height()), height);
+        ui->ImageLabel->move(this->width() / 2 - ui->ImageLabel->width() / 2, 0);
+    }
+
+    ui->mprisFrame->setGeometry(0, this->height() - ui->mprisFrame->height(), this->width(), ui->mprisFrame->sizeHint().height());
+
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event) {
-    hideCover();
+    if (event->key() == Qt::Key_MediaTogglePlayPause || event->key() == Qt::Key_MediaPlay ||
+            event->key() == Qt::Key_MediaPause || event->key() == Qt::Key_MediaStop) {
+        ui->mprisPause->click();
+    } else if (event->key() == Qt::Key_MediaNext) {
+        ui->mprisNext->click();
+    } else if (event->key() == Qt::Key_MediaPrevious) {
+        ui->mprisBack->click();
+    } else {
+        hideCover();
+    }
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -214,6 +344,8 @@ void MainWindow::hideCover() {
             if (tscheckpass->exitCode() == 0) {
                 QApplication::exit(0);
             }
+
+            animation->deleteLater();
         });
         typePassword = true;
         ui->lineEdit->setFocus();
@@ -228,6 +360,7 @@ void MainWindow::showCover() {
         animation->setDuration(500);
         animation->setEasingCurve(QEasingCurve::OutCubic);
         animation->start();
+        connect(animation, SIGNAL(finished()), animation, SLOT(deleteLater()));
         typePassword = false;
         ui->lineEdit->setText("");
         ui->lineEdit->setFocus();
@@ -237,6 +370,9 @@ void MainWindow::showCover() {
 void MainWindow::on_lineEdit_textEdited(const QString &arg1)
 {
     if (!typePassword) {
+        if (arg1 == " ") {
+            ui->lineEdit->setText("");
+        }
         hideCover();
     }
 }
@@ -261,4 +397,22 @@ void MainWindow::on_pushButton_4_clicked()
 void MainWindow::on_goBack_clicked()
 {
     showCover();
+}
+
+void MainWindow::on_mprisPause_clicked()
+{
+    QDBusConnection::sessionBus().call(QDBusMessage::createMethodCall(mprisCurrentAppName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", "PlayPause"), QDBus::NoBlock);
+    ui->lineEdit->setFocus();
+}
+
+void MainWindow::on_mprisBack_clicked()
+{
+    QDBusConnection::sessionBus().call(QDBusMessage::createMethodCall(mprisCurrentAppName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", "Previous"), QDBus::NoBlock);
+    ui->lineEdit->setFocus();
+}
+
+void MainWindow::on_mprisNext_clicked()
+{
+    QDBusConnection::sessionBus().call(QDBusMessage::createMethodCall(mprisCurrentAppName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", "Next"), QDBus::NoBlock);
+    ui->lineEdit->setFocus();
 }

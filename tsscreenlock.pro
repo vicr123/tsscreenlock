@@ -16,10 +16,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    coverframe.cpp
+    coverframe.cpp \
+    topborderframe.cpp
 
 HEADERS  += mainwindow.h \
-    coverframe.h
+    coverframe.h \
+    topborderframe.h
 
 FORMS    += mainwindow.ui
 

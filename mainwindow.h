@@ -12,6 +12,8 @@
 #include <QDBusMessage>
 #include <QDBusConnection>
 #include <QSettings>
+#include <QDBusReply>
+#include <QDBusConnectionInterface>
 
 #include <X11/Xlib.h>
 
@@ -52,6 +54,16 @@ private slots:
 
     void on_goBack_clicked();
 
+    void mprisCheckTimer();
+
+    void resizeSlot();
+
+    void on_mprisPause_clicked();
+
+    void on_mprisBack_clicked();
+
+    void on_mprisNext_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -61,6 +73,9 @@ private:
     int moveY;
     bool typePassword = false;
     QSize imageSize;
+
+    QString mprisCurrentAppName = "";
+    QStringList mprisDetectedApps;
 
 };
 
