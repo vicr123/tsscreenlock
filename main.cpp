@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QWindow>
+#include <QSound>
 #include "mainwindow.h"
 
 int main(int argc, char *argv[])
@@ -13,13 +14,30 @@ int main(int argc, char *argv[])
     XGrabKeyboard(QX11Info::display(), RootWindow(QX11Info::display(), 0), True, GrabModeAsync, GrabModeAsync, CurrentTime);
     XGrabPointer(QX11Info::display(), RootWindow(QX11Info::display(), 0), True, None, GrabModeAsync, GrabModeAsync, RootWindow(QX11Info::display(), 0), None, CurrentTime);
 
+    QList<MainWindow*> windows;
     for (int i = 0; i < a.desktop()->screenCount(); i++) {
         MainWindow* w = new MainWindow();
         w->show();
         w->setGeometry(a.desktop()->screenGeometry(i));
         //w->move(a.desktop()->screenGeometry(i).x(), a.desktop()->screenGeometry(i).y());
         w->showFullScreen();
+        windows.append(w);
     }
 
-    return a.exec();
+    QSound* lockSound = new QSound(":/sounds/lock");
+    lockSound->play();
+
+    int ret = a.exec();
+
+    for (MainWindow* w : windows) {
+        w->close();
+    }
+
+    QSound* unlockSound = new QSound(":/sounds/unlock");
+    unlockSound->play();
+    while (!unlockSound->isFinished()) {
+        a.processEvents();
+    }
+
+    return ret;
 }

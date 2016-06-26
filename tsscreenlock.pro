@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui x11extras dbus
+QT       += core gui x11extras dbus multimedia
 CONFIG   += c++11
 LIBS     += -lxcb -lX11
 

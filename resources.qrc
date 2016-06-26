@@ -5,4 +5,8 @@
         <file>downarrowdark.svg</file>
         <file>uparrowdark.svg</file>
     </qresource>
+    <qresource prefix="/sounds">
+        <file>unlock</file>
+        <file>lock</file>
+    </qresource>
 </RCC>
