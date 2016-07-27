@@ -14,6 +14,8 @@
 #include <QSettings>
 #include <QDBusReply>
 #include <QDBusConnectionInterface>
+#include <QFrame>
+#include <QDebug>
 
 #include <X11/Xlib.h>
 
@@ -64,6 +66,10 @@ private slots:
 
     void on_mprisNext_clicked();
 
+    void showNotification(QString summary, QString body, uint id);
+
+    void closeNotification(uint id, uint reason);
+
 private:
     Ui::MainWindow *ui;
 
@@ -77,6 +83,8 @@ private:
     QString mprisCurrentAppName = "";
     QStringList mprisDetectedApps;
 
+    int notificationHeight = 0;
+    QMap<uint, QFrame*> notificationFrames;
 };
 
 #endif // MAINWINDOW_H

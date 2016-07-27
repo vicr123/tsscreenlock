@@ -12,16 +12,18 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = tsscreenlock
 TEMPLATE = app
-
+DBUS_ADAPTORS += org.thesuite.tsscreenlock.xml
 
 SOURCES += main.cpp\
         mainwindow.cpp \
     coverframe.cpp \
-    topborderframe.cpp
+    topborderframe.cpp \
+    notificationdbus.cpp
 
 HEADERS  += mainwindow.h \
     coverframe.h \
-    topborderframe.h
+    topborderframe.h \
+    notificationdbus.h
 
 FORMS    += mainwindow.ui
 

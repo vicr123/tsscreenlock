@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     ui->incorrectPassword->setVisible(false);
+    QDBusConnection::sessionBus().connect("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "NotificationClosed", this, SLOT(closeNotification(uint,uint)));
 
     QString name = qgetenv("USER");
     if (name.isEmpty()) {
@@ -44,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->timeLabel->setText(QDateTime::currentDateTime().toString("hh:mm:ss"));
     ui->dateLabel_2->setText(QDateTime::currentDateTime().toString("ddd dd MMM yyyy"));
     ui->timeLabel_2->setText(QDateTime::currentDateTime().toString("hh:mm:ss"));
-
+    ui->notificationScroll->setVisible(false);
 
     QSettings settings;
     QString background = settings.value("background", "/usr/share/icons/theos/backgrounds/triangle/1920x1080.png").toString();
@@ -415,4 +416,66 @@ void MainWindow::on_mprisNext_clicked()
 {
     QDBusConnection::sessionBus().call(QDBusMessage::createMethodCall(mprisCurrentAppName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", "Next"), QDBus::NoBlock);
     ui->lineEdit->setFocus();
+}
+
+void MainWindow::showNotification(QString summary, QString body, uint id) {
+    QFrame* frame = new QFrame();
+    frame->setFrameShape(QFrame::Box);
+    frame->setFrameShadow(QFrame::Raised);
+    frame->setAutoFillBackground(true);
+    QBoxLayout* layout = new QBoxLayout(QBoxLayout::LeftToRight);
+    frame->setLayout(layout);
+
+    QLabel* icon = new QLabel();
+    icon->setPixmap(QIcon::fromTheme("dialog-warning").pixmap(24, 24));
+    layout->addWidget(icon);
+
+    QLabel* summaryLab = new QLabel();
+    QFont bold = summaryLab->font();
+    bold.setBold(true);
+    summaryLab->setFont(bold);
+    summaryLab->setText(summary);
+    layout->addWidget(summaryLab);
+
+    QLabel* bodyLab = new QLabel();
+    bodyLab->setText(body);
+    bodyLab->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    layout->addWidget(bodyLab);
+
+    QPushButton* closeButton = new QPushButton();
+    closeButton->setIcon(QIcon::fromTheme("window-close"));
+    closeButton->setProperty("nId", id);
+    connect(closeButton, &QPushButton::clicked, [=]() {
+        QDBusMessage message = QDBusMessage::createMethodCall("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "CloseNotification");
+        QVariantList args;
+        args.append(closeButton->property("nId").toUInt());
+        message.setArguments(args);
+        QDBusConnection::sessionBus().call(message, QDBus::NoBlock);
+    });
+    layout->addWidget(closeButton);
+
+    ((QBoxLayout*) ui->scrollAreaWidgetContents->layout())->insertWidget(0, frame);
+    notificationHeight += frame->height() + ui->scrollAreaWidgetContents->layout()->spacing();
+    notificationFrames.insert(id, frame);
+
+    if (notificationHeight > 250) {
+        notificationHeight = 250;
+    }
+
+    ui->notificationScroll->resize(ui->notificationScroll->width(), notificationHeight);
+    frame->setFixedHeight(frame->sizeHint().height());
+    ui->notificationScroll->setVisible(true);
+}
+
+void MainWindow::closeNotification(uint id, uint reason) {
+    if (reason != 1) {
+        if (notificationFrames.keys().contains(id)) {
+            delete notificationFrames.value(id);
+            notificationFrames.remove(id);
+        }
+
+        if (notificationFrames.count() == 0) {
+            ui->notificationScroll->setVisible(false);
+        }
+    }
 }
