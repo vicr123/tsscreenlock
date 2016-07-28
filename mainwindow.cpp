@@ -49,10 +49,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QSettings settings;
     QString background = settings.value("background", "/usr/share/icons/theos/backgrounds/triangle/1920x1080.png").toString();
-    QPixmap backgroundImage(background);
-    imageSize = backgroundImage.size();
+    darkImage = QImage(background);
 
-    QImage image(background);
+    for (int y = 0; y < darkImage.height(); y++) {
+        for (int x = 0; x < darkImage.width(); x++) {
+            darkImage.setPixelColor(x, y, darkImage.pixelColor(x, y).darker());
+        }
+    }
+
+    imageSize = darkImage.size();
+
+    image = QImage(background);
     QList<bool> lightOrDark;
     for (int w = 0; w < image.width(); w++) {
         for (int h = 0; h < image.height(); h++) {
@@ -81,7 +88,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->timeLabel_2->setPalette(pal);
 
     ui->ImageLabel->setParent(ui->Cover);
-    ui->ImageLabel->setPixmap(backgroundImage);
+    ui->ImageLabel->setPixmap(QPixmap::fromImage(image));
     ui->ImageLabel->setGeometry(0, 0, this->width(), this->height());
     ui->ImageLabel->lower();
 
@@ -216,6 +223,8 @@ void MainWindow::mprisCheckTimer() {
 
 void MainWindow::resizeEvent(QResizeEvent *event) {
     this->resizeSlot();
+
+    ui->notificationScroll->setFixedWidth(this->width() - 400);
     //ui->ImageLabel->setGeometry(0, 0, this->width(), this->height());
 }
 
@@ -270,6 +279,15 @@ void MainWindow::on_pushButton_clicked()
     if (tscheckpass->exitCode() == 0) {
         XUngrabKeyboard(QX11Info::display(), CurrentTime);
         XUngrabPointer(QX11Info::display(), CurrentTime);
+
+        if (idToEmit != -1) {
+            QDBusMessage message = QDBusMessage::createMethodCall("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "invokeAction");
+            QVariantList args;
+            args.append(idToEmit);
+            args.append(actionToEmit);
+            message.setArguments(args);
+            QDBusConnection::sessionBus().call(message, QDBus::NoBlock);
+        }
 
         QApplication::exit();
     } else {
@@ -397,6 +415,8 @@ void MainWindow::on_pushButton_4_clicked()
 
 void MainWindow::on_goBack_clicked()
 {
+    actionToEmit = "";
+    idToEmit = -1;
     showCover();
 }
 
@@ -418,11 +438,11 @@ void MainWindow::on_mprisNext_clicked()
     ui->lineEdit->setFocus();
 }
 
-void MainWindow::showNotification(QString summary, QString body, uint id) {
+void MainWindow::showNotification(QString summary, QString body, uint id, QStringList actions) {
     QFrame* frame = new QFrame();
-    frame->setFrameShape(QFrame::Box);
+    /*frame->setFrameShape(QFrame::Box);
     frame->setFrameShadow(QFrame::Raised);
-    frame->setAutoFillBackground(true);
+    frame->setAutoFillBackground(true);*/
     QBoxLayout* layout = new QBoxLayout(QBoxLayout::LeftToRight);
     frame->setLayout(layout);
 
@@ -440,11 +460,44 @@ void MainWindow::showNotification(QString summary, QString body, uint id) {
     QLabel* bodyLab = new QLabel();
     bodyLab->setText(body);
     bodyLab->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    //bodyLab->setWordWrap(true);
     layout->addWidget(bodyLab);
+
+    if (actions.length() == 2) {
+        QString action = actions.at(0);
+        QPushButton* actionButton = new QPushButton;
+        actionButton->setText(actions.at(1));
+        connect(actionButton, &QPushButton::clicked, [=]() {
+            actionToEmit = action;
+            idToEmit = id;
+            hideCover();
+        });
+        layout->addWidget(actionButton);
+    } else if (actions.length() != 0) {
+        QMenu* menu = new QMenu();
+        for (int i = 0; i < actions.length(); i = i + 2) {
+            QString action = actions.at(i);
+            QString readable = actions.at(i + 1);
+            QAction* act = new QAction();
+            act->setText(readable);
+            act->setData(action);
+            connect(act, &QAction::triggered, [=]() {
+                actionToEmit = action;
+                idToEmit = id;
+                hideCover();
+            });
+            menu->addAction(act);
+        }
+        QPushButton* actionButton = new QPushButton;
+        actionButton->setText("Actions");
+        actionButton->setMenu(menu);
+        layout->addWidget(actionButton);
+    }
 
     QPushButton* closeButton = new QPushButton();
     closeButton->setIcon(QIcon::fromTheme("window-close"));
     closeButton->setProperty("nId", id);
+    closeButton->setFlat(true);
     connect(closeButton, &QPushButton::clicked, [=]() {
         QDBusMessage message = QDBusMessage::createMethodCall("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "CloseNotification");
         QVariantList args;
@@ -465,6 +518,7 @@ void MainWindow::showNotification(QString summary, QString body, uint id) {
     ui->notificationScroll->resize(ui->notificationScroll->width(), notificationHeight);
     frame->setFixedHeight(frame->sizeHint().height());
     ui->notificationScroll->setVisible(true);
+    ui->ImageLabel->setPixmap(QPixmap::fromImage(darkImage));
 }
 
 void MainWindow::closeNotification(uint id, uint reason) {
@@ -476,6 +530,14 @@ void MainWindow::closeNotification(uint id, uint reason) {
 
         if (notificationFrames.count() == 0) {
             ui->notificationScroll->setVisible(false);
+            ui->ImageLabel->setPixmap(QPixmap::fromImage(image));
         }
     }
+}
+
+void MainWindow::on_switchUser_clicked()
+{
+    QDBusMessage message = QDBusMessage::createMethodCall("org.freedesktop.DisplayManager", QString(qgetenv("XDG_SEAT_PATH")), "org.freedesktop.DisplayManager.Seat", "SwitchToGreeter");
+    QDBusConnection::systemBus().send(message);
+    showCover();
 }

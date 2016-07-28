@@ -12,15 +12,15 @@ int main(int argc, char *argv[])
     a.setOrganizationDomain("");
     a.setApplicationName("tsscreenlock");
 
-    XGrabKeyboard(QX11Info::display(), RootWindow(QX11Info::display(), 0), True, GrabModeAsync, GrabModeAsync, CurrentTime);
-    XGrabPointer(QX11Info::display(), RootWindow(QX11Info::display(), 0), True, None, GrabModeAsync, GrabModeAsync, RootWindow(QX11Info::display(), 0), None, CurrentTime);
+    //XGrabKeyboard(QX11Info::display(), RootWindow(QX11Info::display(), 0), True, GrabModeAsync, GrabModeAsync, CurrentTime);
+    //XGrabPointer(QX11Info::display(), RootWindow(QX11Info::display(), 0), True, None, GrabModeAsync, GrabModeAsync, RootWindow(QX11Info::display(), 0), None, CurrentTime);
 
     NotificationDBus* notification = new NotificationDBus();
 
     QList<MainWindow*> windows;
     for (int i = 0; i < a.desktop()->screenCount(); i++) {
         MainWindow* w = new MainWindow();
-        QObject::connect(notification, SIGNAL(showNotification(QString,QString,uint)), w, SLOT(showNotification(QString,QString,uint)));
+        QObject::connect(notification, SIGNAL(showNotification(QString,QString,uint,QStringList)), w, SLOT(showNotification(QString,QString,uint,QStringList)));
         w->show();
         w->setGeometry(a.desktop()->screenGeometry(i));
         //w->move(a.desktop()->screenGeometry(i).x(), a.desktop()->screenGeometry(i).y());

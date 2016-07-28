@@ -5,6 +5,7 @@
       <arg name="summary" type="s" direction="in"/>
       <arg name="body" type="s" direction="in"/>
       <arg name="id" type="u" direction="in"/>
+      <arg name="actions" type="as" direction="in"/>
     </method>
   </interface>
 </node>

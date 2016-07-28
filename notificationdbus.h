@@ -9,10 +9,10 @@ class NotificationDBus : public QObject
     Q_CLASSINFO("D-Bus Interface", "org.thesuite.tsscreenlock.Notifications")
 
 public Q_SLOTS:
-    Q_SCRIPTABLE void newNotification(QString summary, QString body, uint id);
+    Q_SCRIPTABLE void newNotification(QString summary, QString body, uint id, QStringList actions);
 
 signals:
-    void showNotification(QString summary, QString body, uint id);
+    void showNotification(QString summary, QString body, uint id, QStringList actions);
 
 public:
     NotificationDBus(QObject* parent = 0);

@@ -16,6 +16,7 @@
 #include <QDBusConnectionInterface>
 #include <QFrame>
 #include <QDebug>
+#include <QMenu>
 
 #include <X11/Xlib.h>
 
@@ -66,12 +67,17 @@ private slots:
 
     void on_mprisNext_clicked();
 
-    void showNotification(QString summary, QString body, uint id);
+    void showNotification(QString summary, QString body, uint id, QStringList actions);
 
     void closeNotification(uint id, uint reason);
 
+    void on_switchUser_clicked();
+
 private:
     Ui::MainWindow *ui;
+
+    QImage image;
+    QImage darkImage;
 
     void resizeEvent(QResizeEvent* event);
     void keyPressEvent(QKeyEvent* event);
@@ -85,6 +91,8 @@ private:
 
     int notificationHeight = 0;
     QMap<uint, QFrame*> notificationFrames;
+    QString actionToEmit = "";
+    uint idToEmit = -1;
 };
 
 #endif // MAINWINDOW_H
