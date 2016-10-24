@@ -31,6 +31,18 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->Cover->setParent(this);
     ui->Cover->setGeometry(0, 0, this->width(), this->height());
 
+
+    //Set the menu of the MPRIS Media Player selection to a new menu.
+    //Items will be populated during the MPRIS update event.
+    QMenu* mprisSelectionMenu = new QMenu();
+    ui->mprisSelection->setMenu(mprisSelectionMenu);
+    connect(mprisSelectionMenu, &QMenu::aboutToShow, [=]() {
+        pauseMprisMenuUpdate = true;
+    });
+    connect(mprisSelectionMenu, &QMenu::aboutToHide, [=]() {
+        pauseMprisMenuUpdate = false;
+    });
+
     QTimer* clockTimer = new QTimer();
     clockTimer->setInterval(1000);
     connect(clockTimer, &QTimer::timeout, [=]() {
@@ -129,14 +141,16 @@ MainWindow::~MainWindow()
 
 void MainWindow::mprisCheckTimer() {
     mprisDetectedApps.clear();
-    for (QString service : QDBusConnection::sessionBus().interface()->registeredServiceNames().value()) {
 
+    for (QString service : QDBusConnection::sessionBus().interface()->registeredServiceNames().value()) {
         if (service.startsWith("org.mpris.MediaPlayer2.")) {
             if (!mprisDetectedApps.contains(service)) {
+                QDBusConnection::sessionBus().connect(service, "/org/mpris/MediaPlayer2/", "org.freedesktop.DBus.Properties", "PropertiesChanged", this, SLOT(updateMpris()));
                 mprisDetectedApps.append(service);
                 if (mprisCurrentAppName == "") {
                     mprisCurrentAppName = service;
                 }
+                updateMpris();
             }
         }
     }
@@ -157,8 +171,31 @@ void MainWindow::mprisCheckTimer() {
     } else { //Make mpris controller invisible
         ui->mprisFrame->setVisible(false);
     }
+}
 
+void MainWindow::updateMpris() {
     if (ui->mprisFrame->isVisible()) {
+        if (!pauseMprisMenuUpdate) {
+            if (mprisDetectedApps.count() > 1) {
+                QMenu* menu = ui->mprisSelection->menu();
+                menu->clear();
+                for (QString app : mprisDetectedApps) {
+                    QAction* action = new QAction();
+                    action->setData(app);
+                    action->setCheckable(true);
+                    if (mprisCurrentAppName == app) {
+                        action->setChecked(true);
+                    }
+                    action->setText(app.remove("org.mpris.MediaPlayer2."));
+                    menu->addAction(action);
+                }
+                //ui->mprisSelection->setMenu(menu);
+                ui->mprisSelection->setVisible(true);
+            } else {
+                ui->mprisSelection->setVisible(false);
+            }
+        }
+
         //Get Current Song Metadata
         QDBusMessage MetadataRequest = QDBusMessage::createMethodCall(mprisCurrentAppName, "/org/mpris/MediaPlayer2", "org.freedesktop.DBus.Properties", "Get");
         MetadataRequest.setArguments(QList<QVariant>() << "org.mpris.MediaPlayer2.Player" << "Metadata");
@@ -217,7 +254,6 @@ void MainWindow::mprisCheckTimer() {
             ui->mprisPause->setIcon(QIcon::fromTheme("media-playback-start"));
 
         }
-
     }
 }
 
@@ -540,4 +576,9 @@ void MainWindow::on_switchUser_clicked()
     QDBusMessage message = QDBusMessage::createMethodCall("org.freedesktop.DisplayManager", QString(qgetenv("XDG_SEAT_PATH")), "org.freedesktop.DisplayManager.Seat", "SwitchToGreeter");
     QDBusConnection::systemBus().send(message);
     showCover();
+}
+
+void MainWindow::on_mprisSelection_triggered(QAction *arg1)
+{
+    mprisCurrentAppName = arg1->data().toString();
 }

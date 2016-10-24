@@ -17,6 +17,7 @@
 #include <QFrame>
 #include <QDebug>
 #include <QMenu>
+#include "newcall.h"
 
 #include <X11/Xlib.h>
 
@@ -73,6 +74,10 @@ private slots:
 
     void on_switchUser_clicked();
 
+    void on_mprisSelection_triggered(QAction *arg1);
+
+    void updateMpris();
+
 private:
     Ui::MainWindow *ui;
 
@@ -88,6 +93,7 @@ private:
 
     QString mprisCurrentAppName = "";
     QStringList mprisDetectedApps;
+    bool pauseMprisMenuUpdate = false;
 
     int notificationHeight = 0;
     QMap<uint, QFrame*> notificationFrames;

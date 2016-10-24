@@ -18,14 +18,17 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     coverframe.cpp \
     topborderframe.cpp \
-    notificationdbus.cpp
+    notificationdbus.cpp \
+    newcall.cpp
 
 HEADERS  += mainwindow.h \
     coverframe.h \
     topborderframe.h \
-    notificationdbus.h
+    notificationdbus.h \
+    newcall.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    newcall.ui
 
 RESOURCES += \
     resources.qrc
