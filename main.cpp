@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
     QList<MainWindow*> windows;
     for (int i = 0; i < a.desktop()->screenCount(); i++) {
         MainWindow* w = new MainWindow();
+        w->setWindowFlags(Qt::WindowStaysOnTopHint);
         QObject::connect(notification, SIGNAL(showNotification(QString,QString,uint,QStringList,QVariantMap)), w, SLOT(showNotification(QString,QString,uint,QStringList,QVariantMap)));
         w->show();
         w->setGeometry(a.desktop()->screenGeometry(i));
