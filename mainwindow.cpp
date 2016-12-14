@@ -30,7 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //QRect screenGeometry = QApplication::desktop()->screenGeometry();
     ui->Cover->setParent(this);
     ui->Cover->setGeometry(0, 0, this->width(), this->height());
-
+    ui->timerFrame->setParent(this);
+    ui->timerFrame->setGeometry(0, this->height(), this->width(), this->height());
 
     //Set the menu of the MPRIS Media Player selection to a new menu.
     //Items will be populated during the MPRIS update event.
@@ -285,6 +286,7 @@ void MainWindow::resizeSlot() {
 
     ui->mprisFrame->setGeometry(0, this->height() - ui->mprisFrame->height(), this->width(), ui->mprisFrame->sizeHint().height());
 
+    ui->timerFrame->setGeometry(0, this->height(), this->width(), this->height());
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
@@ -474,99 +476,121 @@ void MainWindow::on_mprisNext_clicked()
     ui->lineEdit->setFocus();
 }
 
-void MainWindow::showNotification(QString summary, QString body, uint id, QStringList actions) {
-    QFrame* frame = new QFrame();
-    /*frame->setFrameShape(QFrame::Box);
-    frame->setFrameShadow(QFrame::Raised);
-    frame->setAutoFillBackground(true);*/
-    QBoxLayout* layout = new QBoxLayout(QBoxLayout::LeftToRight);
-    frame->setLayout(layout);
+void MainWindow::showNotification(QString summary, QString body, uint id, QStringList actions, QVariantMap hints) {
+    if (hints.value("x-thesuite-timercomplete", false).toBool()) {
+        QPropertyAnimation* anim = new QPropertyAnimation(ui->timerFrame, "geometry");
+        anim->setStartValue(ui->timerFrame->geometry());
+        anim->setEndValue(QRect(0, 0, this->width(), this->height()));
+        anim->setEasingCurve(QEasingCurve::OutCubic);
+        anim->setDuration(500);
+        connect(anim, SIGNAL(finished()), anim, SLOT(deleteLater()));
+        anim->start();
 
-    QLabel* icon = new QLabel();
-    icon->setPixmap(QIcon::fromTheme("dialog-warning").pixmap(24, 24));
-    layout->addWidget(icon);
+        closeTimerId = id;
+    } else {
+        QFrame* frame = new QFrame();
+        /*frame->setFrameShape(QFrame::Box);
+        frame->setFrameShadow(QFrame::Raised);
+        frame->setAutoFillBackground(true);*/
+        QBoxLayout* layout = new QBoxLayout(QBoxLayout::LeftToRight);
+        frame->setLayout(layout);
 
-    QLabel* summaryLab = new QLabel();
-    QFont bold = summaryLab->font();
-    bold.setBold(true);
-    summaryLab->setFont(bold);
-    summaryLab->setText(summary);
-    layout->addWidget(summaryLab);
+        QLabel* icon = new QLabel();
+        icon->setPixmap(QIcon::fromTheme("dialog-warning").pixmap(24, 24));
+        layout->addWidget(icon);
 
-    QLabel* bodyLab = new QLabel();
-    bodyLab->setText(body);
-    bodyLab->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    //bodyLab->setWordWrap(true);
-    layout->addWidget(bodyLab);
+        QLabel* summaryLab = new QLabel();
+        QFont bold = summaryLab->font();
+        bold.setBold(true);
+        summaryLab->setFont(bold);
+        summaryLab->setText(summary);
+        layout->addWidget(summaryLab);
 
-    if (actions.length() == 2) {
-        QString action = actions.at(0);
-        QPushButton* actionButton = new QPushButton;
-        actionButton->setText(actions.at(1));
-        connect(actionButton, &QPushButton::clicked, [=]() {
-            actionToEmit = action;
-            idToEmit = id;
-            hideCover();
-        });
-        layout->addWidget(actionButton);
-    } else if (actions.length() != 0) {
-        QMenu* menu = new QMenu();
-        for (int i = 0; i < actions.length(); i = i + 2) {
-            QString action = actions.at(i);
-            QString readable = actions.at(i + 1);
-            QAction* act = new QAction();
-            act->setText(readable);
-            act->setData(action);
-            connect(act, &QAction::triggered, [=]() {
+        QLabel* bodyLab = new QLabel();
+        bodyLab->setText(body);
+        bodyLab->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        //bodyLab->setWordWrap(true);
+        layout->addWidget(bodyLab);
+
+        if (actions.length() == 2) {
+            QString action = actions.at(0);
+            QPushButton* actionButton = new QPushButton;
+            actionButton->setText(actions.at(1));
+            connect(actionButton, &QPushButton::clicked, [=]() {
                 actionToEmit = action;
                 idToEmit = id;
                 hideCover();
             });
-            menu->addAction(act);
+            layout->addWidget(actionButton);
+        } else if (actions.length() != 0) {
+            QMenu* menu = new QMenu();
+            for (int i = 0; i < actions.length(); i = i + 2) {
+                QString action = actions.at(i);
+                QString readable = actions.at(i + 1);
+                QAction* act = new QAction();
+                act->setText(readable);
+                act->setData(action);
+                connect(act, &QAction::triggered, [=]() {
+                    actionToEmit = action;
+                    idToEmit = id;
+                    hideCover();
+                });
+                menu->addAction(act);
+            }
+            QPushButton* actionButton = new QPushButton;
+            actionButton->setText("Actions");
+            actionButton->setMenu(menu);
+            layout->addWidget(actionButton);
         }
-        QPushButton* actionButton = new QPushButton;
-        actionButton->setText("Actions");
-        actionButton->setMenu(menu);
-        layout->addWidget(actionButton);
+
+        QPushButton* closeButton = new QPushButton();
+        closeButton->setIcon(QIcon::fromTheme("window-close"));
+        closeButton->setProperty("nId", id);
+        closeButton->setFlat(true);
+        connect(closeButton, &QPushButton::clicked, [=]() {
+            QDBusMessage message = QDBusMessage::createMethodCall("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "CloseNotification");
+            QVariantList args;
+            args.append(closeButton->property("nId").toUInt());
+            message.setArguments(args);
+            QDBusConnection::sessionBus().call(message, QDBus::NoBlock);
+        });
+        layout->addWidget(closeButton);
+
+        ((QBoxLayout*) ui->scrollAreaWidgetContents->layout())->insertWidget(0, frame);
+        notificationHeight += frame->height() + ui->scrollAreaWidgetContents->layout()->spacing();
+        notificationFrames.insert(id, frame);
+
+        if (notificationHeight > 250) {
+            notificationHeight = 250;
+        }
+
+        ui->notificationScroll->resize(ui->notificationScroll->width(), notificationHeight);
+        frame->setFixedHeight(frame->sizeHint().height());
+        ui->notificationScroll->setVisible(true);
+        ui->ImageLabel->setPixmap(QPixmap::fromImage(darkImage));
     }
-
-    QPushButton* closeButton = new QPushButton();
-    closeButton->setIcon(QIcon::fromTheme("window-close"));
-    closeButton->setProperty("nId", id);
-    closeButton->setFlat(true);
-    connect(closeButton, &QPushButton::clicked, [=]() {
-        QDBusMessage message = QDBusMessage::createMethodCall("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "CloseNotification");
-        QVariantList args;
-        args.append(closeButton->property("nId").toUInt());
-        message.setArguments(args);
-        QDBusConnection::sessionBus().call(message, QDBus::NoBlock);
-    });
-    layout->addWidget(closeButton);
-
-    ((QBoxLayout*) ui->scrollAreaWidgetContents->layout())->insertWidget(0, frame);
-    notificationHeight += frame->height() + ui->scrollAreaWidgetContents->layout()->spacing();
-    notificationFrames.insert(id, frame);
-
-    if (notificationHeight > 250) {
-        notificationHeight = 250;
-    }
-
-    ui->notificationScroll->resize(ui->notificationScroll->width(), notificationHeight);
-    frame->setFixedHeight(frame->sizeHint().height());
-    ui->notificationScroll->setVisible(true);
-    ui->ImageLabel->setPixmap(QPixmap::fromImage(darkImage));
 }
 
 void MainWindow::closeNotification(uint id, uint reason) {
     if (reason != 1) {
-        if (notificationFrames.keys().contains(id)) {
-            delete notificationFrames.value(id);
-            notificationFrames.remove(id);
-        }
+        if (closeTimerId == id) {
+            QPropertyAnimation* anim = new QPropertyAnimation(ui->timerFrame, "geometry");
+            anim->setStartValue(ui->timerFrame->geometry());
+            anim->setEndValue(QRect(0, this->height(), this->width(), this->height()));
+            anim->setEasingCurve(QEasingCurve::OutCubic);
+            anim->setDuration(500);
+            connect(anim, SIGNAL(finished()), anim, SLOT(deleteLater()));
+            anim->start();
+        } else {
+            if (notificationFrames.keys().contains(id)) {
+                delete notificationFrames.value(id);
+                notificationFrames.remove(id);
+            }
 
-        if (notificationFrames.count() == 0) {
-            ui->notificationScroll->setVisible(false);
-            ui->ImageLabel->setPixmap(QPixmap::fromImage(image));
+            if (notificationFrames.count() == 0) {
+                ui->notificationScroll->setVisible(false);
+                ui->ImageLabel->setPixmap(QPixmap::fromImage(image));
+            }
         }
     }
 }
@@ -581,4 +605,21 @@ void MainWindow::on_switchUser_clicked()
 void MainWindow::on_mprisSelection_triggered(QAction *arg1)
 {
     mprisCurrentAppName = arg1->data().toString();
+}
+
+void MainWindow::on_stopTimerButton_clicked()
+{
+    QDBusMessage message = QDBusMessage::createMethodCall("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "CloseNotification");
+    QVariantList args;
+    args.append(closeTimerId);
+    message.setArguments(args);
+    QDBusConnection::sessionBus().call(message, QDBus::NoBlock);
+
+    QPropertyAnimation* anim = new QPropertyAnimation(ui->timerFrame, "geometry");
+    anim->setStartValue(ui->timerFrame->geometry());
+    anim->setEndValue(QRect(0, this->height(), this->width(), this->height()));
+    anim->setEasingCurve(QEasingCurve::OutCubic);
+    anim->setDuration(500);
+    connect(anim, SIGNAL(finished()), anim, SLOT(deleteLater()));
+    anim->start();
 }

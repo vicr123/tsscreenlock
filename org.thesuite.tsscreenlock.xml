@@ -6,6 +6,8 @@
       <arg name="body" type="s" direction="in"/>
       <arg name="id" type="u" direction="in"/>
       <arg name="actions" type="as" direction="in"/>
+      <arg name="hints" type="a{sv}" direction="in"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.In4" value="QVariantMap"/>
     </method>
   </interface>
 </node>

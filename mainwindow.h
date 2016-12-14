@@ -68,7 +68,7 @@ private slots:
 
     void on_mprisNext_clicked();
 
-    void showNotification(QString summary, QString body, uint id, QStringList actions);
+    void showNotification(QString summary, QString body, uint id, QStringList actions, QVariantMap hints);
 
     void closeNotification(uint id, uint reason);
 
@@ -77,6 +77,8 @@ private slots:
     void on_mprisSelection_triggered(QAction *arg1);
 
     void updateMpris();
+
+    void on_stopTimerButton_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -99,6 +101,8 @@ private:
     QMap<uint, QFrame*> notificationFrames;
     QString actionToEmit = "";
     uint idToEmit = -1;
+
+    uint closeTimerId;
 };
 
 #endif // MAINWINDOW_H

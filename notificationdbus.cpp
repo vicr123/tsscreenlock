@@ -9,6 +9,6 @@ NotificationDBus::NotificationDBus(QObject* parent) : QObject(parent)
     dbus.registerService("org.thesuite.tsscreenlock");
 }
 
-void NotificationDBus::newNotification(QString summary, QString body, uint id, QStringList actions) {
-    emit showNotification(summary, body, id, actions);
+void NotificationDBus::newNotification(QString summary, QString body, uint id, QStringList actions, QVariantMap hints) {
+    emit showNotification(summary, body, id, actions, hints);
 }
