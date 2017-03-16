@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QWindow>
 #include <QSound>
+#include <QDebug>
 #include "mainwindow.h"
 #include "notificationdbus.h"
 
@@ -8,12 +9,15 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    qDebug() << a.arguments();
+    if (!a.arguments().contains("--nograb")) {
+        XGrabKeyboard(QX11Info::display(), RootWindow(QX11Info::display(), 0), True, GrabModeAsync, GrabModeAsync, CurrentTime);
+        XGrabPointer(QX11Info::display(), RootWindow(QX11Info::display(), 0), True, None, GrabModeAsync, GrabModeAsync, RootWindow(QX11Info::display(), 0), None, CurrentTime);
+    }
+
     a.setOrganizationName("theSuite");
     a.setOrganizationDomain("");
     a.setApplicationName("tsscreenlock");
-
-    XGrabKeyboard(QX11Info::display(), RootWindow(QX11Info::display(), 0), True, GrabModeAsync, GrabModeAsync, CurrentTime);
-    XGrabPointer(QX11Info::display(), RootWindow(QX11Info::display(), 0), True, None, GrabModeAsync, GrabModeAsync, RootWindow(QX11Info::display(), 0), None, CurrentTime);
 
     NotificationDBus* notification = new NotificationDBus();
 
@@ -34,12 +38,13 @@ int main(int argc, char *argv[])
 
     int ret = a.exec();
 
-    for (MainWindow* w : windows) {
-        w->close();
-    }
-
     QSound* unlockSound = new QSound(":/sounds/unlock");
     unlockSound->play();
+
+    for (MainWindow* w : windows) {
+        w->animateClose();
+    }
+
     while (!unlockSound->isFinished()) {
         a.processEvents();
     }

@@ -32,6 +32,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->Cover->setGeometry(0, 0, this->width(), this->height());
     ui->timerFrame->setParent(this);
     ui->timerFrame->setGeometry(0, this->height(), this->width(), this->height());
+    ui->hudFrame->setParent(this);
+    ui->hudFrame->setGeometry(0, -ui->hudFrame->height(), this->width(), ui->hudFrame->sizeHint().height());
+    ui->hudFrame->setFixedSize(this->width(), ui->hudFrame->sizeHint().height());
 
     //Set the menu of the MPRIS Media Player selection to a new menu.
     //Items will be populated during the MPRIS update event.
@@ -285,8 +288,8 @@ void MainWindow::resizeSlot() {
     }
 
     ui->mprisFrame->setGeometry(0, this->height() - ui->mprisFrame->height(), this->width(), ui->mprisFrame->sizeHint().height());
-
     ui->timerFrame->setGeometry(0, this->height(), this->width(), this->height());
+    ui->hudFrame->setFixedSize(this->width(), ui->hudFrame->sizeHint().height());
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
@@ -297,6 +300,124 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         ui->mprisNext->click();
     } else if (event->key() == Qt::Key_MediaPrevious) {
         ui->mprisBack->click();
+    } else if (event->key() == Qt::Key_VolumeDown) {
+        tPropertyAnimation* anim = new tPropertyAnimation(ui->hudFrame, "geometry");
+        anim->setStartValue(ui->hudFrame->geometry());
+        anim->setEndValue(QRect(0, 0, ui->hudFrame->width(), ui->hudFrame->height()));
+        anim->setEasingCurve(QEasingCurve::OutCubic);
+        anim->setDuration(500);
+        anim->start();
+
+        if (volumeTimer != NULL) {
+            volumeTimer->stop();
+            volumeTimer->deleteLater();
+        }
+        volumeTimer = new QTimer();
+        volumeTimer->setInterval(3000);
+        connect(volumeTimer, &QTimer::timeout, [=] {
+            tPropertyAnimation* anim = new tPropertyAnimation(ui->hudFrame, "geometry");
+            anim->setStartValue(ui->hudFrame->geometry());
+            anim->setEndValue(QRect(0, -ui->hudFrame->height(), ui->hudFrame->width(), ui->hudFrame->height()));
+            anim->setEasingCurve(QEasingCurve::OutCubic);
+            anim->setDuration(500);
+            anim->start();
+        });
+        volumeTimer->start();
+
+        //Get Current Limits
+        QProcess* mixer = new QProcess(this);
+        mixer->start("amixer");
+        mixer->waitForFinished();
+        QString output(mixer->readAll());
+
+        bool readLine = false;
+        int limit;
+        QString percent;
+        for (QString line : output.split("\n")) {
+            if (line.startsWith(" ") && readLine) {
+                if (line.startsWith("  Limits:")) {
+                    limit = line.split(" ").last().toInt();
+                } else if (line.startsWith("  Front Left:")) {
+                    if (line.contains("[off]")) {
+                        percent = "0";
+                    } else {
+                        percent = line.mid(line.indexOf("\[") + 1, 3).remove("\%").remove("]");
+                    }
+                }
+            } else {
+                if (line.contains("'Master'")) {
+                    readLine = true;
+                } else {
+                    readLine = false;
+                }
+            }
+        }
+
+        int volume = percent.toInt() - 5;
+
+        mixer->start("amixer set Master " + QString::number(limit * (volume / (float) 100)) + " on");
+        connect(mixer, SIGNAL(finished(int)), mixer, SLOT(deleteLater()));
+
+        ui->hudLabel->setText("Volume: " + QString::number(volume) + "%");
+    } else if (event->key() == Qt::Key_VolumeUp) {
+        tPropertyAnimation* anim = new tPropertyAnimation(ui->hudFrame, "geometry");
+        anim->setStartValue(ui->hudFrame->geometry());
+        anim->setEndValue(QRect(0, 0, ui->hudFrame->width(), ui->hudFrame->height()));
+        anim->setEasingCurve(QEasingCurve::OutCubic);
+        anim->setDuration(500);
+        anim->start();
+
+        if (volumeTimer != NULL) {
+            volumeTimer->stop();
+            volumeTimer->deleteLater();
+        }
+        volumeTimer = new QTimer();
+        volumeTimer->setInterval(3000);
+        connect(volumeTimer, &QTimer::timeout, [=] {
+            tPropertyAnimation* anim = new tPropertyAnimation(ui->hudFrame, "geometry");
+            anim->setStartValue(ui->hudFrame->geometry());
+            anim->setEndValue(QRect(0, -ui->hudFrame->height(), ui->hudFrame->width(), ui->hudFrame->height()));
+            anim->setEasingCurve(QEasingCurve::OutCubic);
+            anim->setDuration(500);
+            anim->start();
+        });
+        volumeTimer->start();
+
+        //Get Current Limits
+        QProcess* mixer = new QProcess(this);
+        mixer->start("amixer");
+        mixer->waitForFinished();
+        QString output(mixer->readAll());
+
+        bool readLine = false;
+        int limit;
+        QString percent;
+        for (QString line : output.split("\n")) {
+            if (line.startsWith(" ") && readLine) {
+                if (line.startsWith("  Limits:")) {
+                    limit = line.split(" ").last().toInt();
+                } else if (line.startsWith("  Front Left:")) {
+                    if (line.contains("[off]")) {
+                        percent = "0";
+                    } else {
+                        percent = line.mid(line.indexOf("\[") + 1, 3).remove("\%").remove("]");
+                    }
+                }
+            } else {
+                if (line.contains("'Master'")) {
+                    readLine = true;
+                } else {
+                    readLine = false;
+                }
+            }
+        }
+
+        int volume = percent.toInt() + 5;
+
+        mixer->start("amixer set Master " + QString::number(limit * (volume / (float) 100)) + " on");
+        connect(mixer, SIGNAL(finished(int)), mixer, SLOT(deleteLater()));
+
+        ui->hudLabel->setText("Volume: " + QString::number(volume) + "%");
     } else {
         hideCover();
     }
@@ -622,4 +743,102 @@ void MainWindow::on_stopTimerButton_clicked()
     anim->setDuration(500);
     connect(anim, SIGNAL(finished()), anim, SLOT(deleteLater()));
     anim->start();
+}
+
+void MainWindow::animateClose() {
+    {
+        QRegion reg(0, 0, this->width(), this->height());
+        reg = reg.subtracted(QRect(ui->pushButton->mapTo(this, QPoint(0, 0)), ui->pushButton->geometry().size()));
+        this->setMask(reg);
+
+        tVariantAnimation* horiz = new tVariantAnimation(this);
+        horiz->setStartValue((float) 0);
+        horiz->setEndValue((float) 1);
+        horiz->setDuration(250);
+        horiz->setEasingCurve(QEasingCurve::OutCubic);
+        connect(horiz, &tVariantAnimation::valueChanged, [=](QVariant percentage) {
+            QRegion reg(0, 0, this->width(), this->height());
+            QRect subtraction;
+            subtraction.setTop(ui->pushButton->mapTo(this, QPoint(0, 0)).y());
+            subtraction.setHeight(ui->pushButton->height());
+            int leftButton = ui->pushButton->mapTo(this, QPoint(0, 0)).x();
+            int middleButton = leftButton + ui->pushButton->width() / 2;
+
+            //Calculate left area
+            int leftArea = (float) middleButton * percentage.toFloat();
+
+            //Calculate right area
+            int rightArea = (float) (this->width() - middleButton) * percentage.toFloat();
+
+            subtraction.setLeft(middleButton - leftArea);
+            subtraction.setRight(middleButton + rightArea);
+
+            reg = reg.subtracted(subtraction);
+            this->setMask(reg);
+        });
+        connect(horiz, &tVariantAnimation::finished, [=] {
+            horiz->deleteLater();
+
+            tVariantAnimation* vert = new tVariantAnimation(this);
+            vert->setStartValue((float) 0);
+            vert->setEndValue((float) 1);
+            vert->setDuration(250);
+            vert->setEasingCurve(QEasingCurve::InCubic);
+            connect(vert, &tVariantAnimation::valueChanged, [=](QVariant percentage) {
+                QRegion reg(0, 0, this->width(), this->height());
+                QRect subtraction;
+                subtraction.setLeft(0);
+                subtraction.setWidth(this->width());
+
+                int topButton = ui->pushButton->mapTo(this, QPoint(0, 0)).y();
+
+                //Calculate top area
+                int topArea = (float) topButton * percentage.toFloat();
+
+                //Calculate bottom area
+                int bottomArea = (float) (this->height() - (topButton + ui->pushButton->height())) * percentage.toFloat();
+
+                subtraction.setTop(topButton - topArea);
+                subtraction.setBottom(topButton + ui->pushButton->height() + bottomArea);
+
+                reg = reg.subtracted(subtraction);
+                this->setMask(reg);
+            });
+            connect(vert, &tVariantAnimation::finished, [=] {
+                this->close();
+            });
+            vert->start();
+        });
+        horiz->start();
+    }
+}
+
+void MainWindow::showFullScreen() {
+    //this->setWindowFlags(Qt::Window | Qt::X11BypassWindowManagerHint);
+
+    this->setMask(QRegion(0, 0, 1, 1));
+    QMainWindow::showFullScreen();
+    int end = qSqrt((this->width() / 2) * (this->width() / 2) + (this->height() / 2) * (this->height() / 2));
+
+    tVariantAnimation* radius = new tVariantAnimation(this);
+    radius->setStartValue(0);
+    radius->setEndValue(end);
+    radius->setDuration(200);
+    radius->setEasingCurve(QEasingCurve::InCubic);
+    connect(radius, &tVariantAnimation::valueChanged, [=](QVariant rad) {
+        QRect circle;
+        QPoint center(this->width() / 2, this->height() / 2);
+        circle.setLeft(center.x() - rad.toInt());
+        circle.setTop(center.y() - rad.toInt());
+        circle.setWidth(rad.toInt() * 2);
+        circle.setHeight(rad.toInt() * 2);
+
+        QRegion mask(circle, QRegion::Ellipse);
+        this->setMask(mask);
+    });
+    connect(radius, SIGNAL(finished()), radius, SLOT(deleteLater()));
+    /*QTimer::singleShot(1000, radius, [=] {
+        radius->start();
+    });*/
+    radius->start();
 }

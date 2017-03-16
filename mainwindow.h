@@ -17,7 +17,11 @@
 #include <QFrame>
 #include <QDebug>
 #include <QMenu>
+#include <QLabel>
+#include <QPushButton>
+#include <tpropertyanimation.h>
 #include "newcall.h"
+#include <qmath.h>
 
 #include <X11/Xlib.h>
 
@@ -80,6 +84,11 @@ private slots:
 
     void on_stopTimerButton_clicked();
 
+public slots:
+    void animateClose();
+
+    void showFullScreen();
+
 private:
     Ui::MainWindow *ui;
 
@@ -103,6 +112,8 @@ private:
     uint idToEmit = -1;
 
     uint closeTimerId;
+
+    QTimer* volumeTimer = NULL;
 };
 
 #endif // MAINWINDOW_H
