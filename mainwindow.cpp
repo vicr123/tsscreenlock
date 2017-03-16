@@ -824,7 +824,7 @@ void MainWindow::showFullScreen() {
     radius->setStartValue(0);
     radius->setEndValue(end);
     radius->setDuration(200);
-    radius->setEasingCurve(QEasingCurve::InCubic);
+    radius->setEasingCurve(QEasingCurve::InSine);
     connect(radius, &tVariantAnimation::valueChanged, [=](QVariant rad) {
         QRect circle;
         QPoint center(this->width() / 2, this->height() / 2);
