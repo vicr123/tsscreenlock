@@ -19,16 +19,19 @@ SOURCES += main.cpp\
     coverframe.cpp \
     topborderframe.cpp \
     notificationdbus.cpp \
-    newcall.cpp
+    newcall.cpp \
+    timercomplete.cpp
 
 HEADERS  += mainwindow.h \
     coverframe.h \
     topborderframe.h \
     notificationdbus.h \
-    newcall.h
+    newcall.h \
+    timercomplete.h
 
 FORMS    += mainwindow.ui \
-    newcall.ui
+    newcall.ui \
+    timercomplete.ui
 
 RESOURCES += \
     resources.qrc

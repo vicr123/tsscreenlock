@@ -5,6 +5,8 @@
 #include "mainwindow.h"
 #include "notificationdbus.h"
 
+bool capturingKeyPress = false;
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);

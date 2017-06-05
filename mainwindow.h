@@ -19,8 +19,10 @@
 #include <QMenu>
 #include <QLabel>
 #include <QPushButton>
+#include <QDBusInterface>
 #include <tpropertyanimation.h>
 #include "newcall.h"
+#include "timercomplete.h"
 #include <qmath.h>
 
 #include <X11/Xlib.h>
@@ -84,6 +86,10 @@ private slots:
 
     void on_stopTimerButton_clicked();
 
+    void BatteriesChanged();
+
+    void BatteryChanged();
+
 public slots:
     void animateClose();
 
@@ -111,7 +117,11 @@ private:
     QString actionToEmit = "";
     uint idToEmit = -1;
 
+    TimerComplete* TimerNotificationDialog;
+
     uint closeTimerId;
+
+    QList<QDBusInterface*> allDevices;
 
     QTimer* volumeTimer = NULL;
 };

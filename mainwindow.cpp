@@ -29,9 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //QRect screenGeometry = QApplication::desktop()->screenGeometry();
     ui->Cover->setParent(this);
-    ui->Cover->setGeometry(0, 0, this->width(), this->height());
-    ui->timerFrame->setParent(this);
-    ui->timerFrame->setGeometry(0, this->height(), this->width(), this->height());
+    ui->Cover->setGeometry(0, 0, this->width(), this->height());\
     ui->hudFrame->setParent(this);
     ui->hudFrame->setGeometry(0, -ui->hudFrame->height(), this->width(), ui->hudFrame->sizeHint().height());
     ui->hudFrame->setFixedSize(this->width(), ui->hudFrame->sizeHint().height());
@@ -112,7 +110,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->mprisFrame->setGeometry(0, this->height() - ui->mprisFrame->height(), this->width(), ui->mprisFrame->sizeHint().height());
     ui->mprisFrame->raise();
 
-    ui->mprisArt->setPixmap(QIcon::fromTheme("audio-generic").pixmap(32, 32));
+    ui->mprisArt->setPixmap(QIcon::fromTheme("audio-generic").pixmap(32, 32));\
 
     /*ui->Cover->setStyleSheet("QWidget#Cover {"
                              "background: url(\"" + background + "\");"
@@ -134,6 +132,17 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mprisTimer, SIGNAL(timeout()), this, SLOT(mprisCheckTimer()));
     mprisTimer->start();
     mprisCheckTimer();
+
+    //Set up timer to check UPower properties
+    QTimer* batteryTimer = new QTimer(this);
+    batteryTimer->setInterval(1000);
+    connect(batteryTimer, SIGNAL(timeout()), this, SLOT(BatteryChanged()));
+    batteryTimer->start();
+
+    QDBusConnection::systemBus().connect("org.freedesktop.UPower", "/org/freedesktop/UPower", "org.freedesktop.UPower", "DeviceAdded", this, SLOT(BatteriesChanged()));
+    QDBusConnection::systemBus().connect("org.freedesktop.UPower", "/org/freedesktop/UPower", "org.freedesktop.UPower", "DeviceRemoved", this, SLOT(BatteriesChanged()));
+
+    BatteriesChanged();
 }
 
 MainWindow::~MainWindow()
@@ -288,7 +297,6 @@ void MainWindow::resizeSlot() {
     }
 
     ui->mprisFrame->setGeometry(0, this->height() - ui->mprisFrame->height(), this->width(), ui->mprisFrame->sizeHint().height());
-    ui->timerFrame->setGeometry(0, this->height(), this->width(), this->height());
     ui->hudFrame->setFixedSize(this->width(), ui->hudFrame->sizeHint().height());
 }
 
@@ -500,7 +508,7 @@ void MainWindow::on_Cover_MouseUp(QMouseEvent *event)
 
 void MainWindow::hideCover() {
     if (!typePassword) {
-        QPropertyAnimation* animation = new QPropertyAnimation(ui->Cover, "geometry");
+        tPropertyAnimation* animation = new tPropertyAnimation(ui->Cover, "geometry");
         animation->setStartValue(ui->Cover->geometry());
         if (ui->Cover->geometry().top() > 0) {
             animation->setEndValue(ui->Cover->geometry().translated(0, this->height()));
@@ -532,7 +540,7 @@ void MainWindow::hideCover() {
 
 void MainWindow::showCover() {
     if (typePassword) {
-        QPropertyAnimation* animation = new QPropertyAnimation(ui->Cover, "geometry");
+        tPropertyAnimation* animation = new tPropertyAnimation(ui->Cover, "geometry");
         animation->setStartValue(ui->Cover->geometry());
         animation->setEndValue(QRect(0, 0, this->width(), this->height()));
         animation->setDuration(500);
@@ -599,13 +607,17 @@ void MainWindow::on_mprisNext_clicked()
 
 void MainWindow::showNotification(QString summary, QString body, uint id, QStringList actions, QVariantMap hints) {
     if (hints.value("x-thesuite-timercomplete", false).toBool()) {
-        QPropertyAnimation* anim = new QPropertyAnimation(ui->timerFrame, "geometry");
+        //ui->timerFrame->setVisible(true);
+
+        /*QPropertyAnimation* anim = new QPropertyAnimation(ui->timerFrame, "geometry");
         anim->setStartValue(ui->timerFrame->geometry());
         anim->setEndValue(QRect(0, 0, this->width(), this->height()));
         anim->setEasingCurve(QEasingCurve::OutCubic);
         anim->setDuration(500);
         connect(anim, SIGNAL(finished()), anim, SLOT(deleteLater()));
-        anim->start();
+        anim->start();*/
+
+        TimerNotificationDialog->showFullScreen();
 
         closeTimerId = id;
     } else {
@@ -695,13 +707,14 @@ void MainWindow::showNotification(QString summary, QString body, uint id, QStrin
 void MainWindow::closeNotification(uint id, uint reason) {
     if (reason != 1) {
         if (closeTimerId == id) {
-            QPropertyAnimation* anim = new QPropertyAnimation(ui->timerFrame, "geometry");
+            /*QPropertyAnimation* anim = new QPropertyAnimation(ui->timerFrame, "geometry");
             anim->setStartValue(ui->timerFrame->geometry());
             anim->setEndValue(QRect(0, this->height(), this->width(), this->height()));
             anim->setEasingCurve(QEasingCurve::OutCubic);
             anim->setDuration(500);
             connect(anim, SIGNAL(finished()), anim, SLOT(deleteLater()));
-            anim->start();
+            anim->start();*/
+            TimerNotificationDialog->close();
         } else {
             if (notificationFrames.keys().contains(id)) {
                 delete notificationFrames.value(id);
@@ -736,13 +749,13 @@ void MainWindow::on_stopTimerButton_clicked()
     message.setArguments(args);
     QDBusConnection::sessionBus().call(message, QDBus::NoBlock);
 
-    QPropertyAnimation* anim = new QPropertyAnimation(ui->timerFrame, "geometry");
+    /*QPropertyAnimation* anim = new QPropertyAnimation(ui->timerFrame, "geometry");
     anim->setStartValue(ui->timerFrame->geometry());
     anim->setEndValue(QRect(0, this->height(), this->width(), this->height()));
     anim->setEasingCurve(QEasingCurve::OutCubic);
     anim->setDuration(500);
     connect(anim, SIGNAL(finished()), anim, SLOT(deleteLater()));
-    anim->start();
+    anim->start();*/
 }
 
 void MainWindow::animateClose() {
@@ -824,7 +837,7 @@ void MainWindow::showFullScreen() {
     radius->setStartValue(0);
     radius->setEndValue(end);
     radius->setDuration(200);
-    radius->setEasingCurve(QEasingCurve::InSine);
+    radius->setEasingCurve(QEasingCurve::OutSine);
     connect(radius, &tVariantAnimation::valueChanged, [=](QVariant rad) {
         QRect circle;
         QPoint center(this->width() / 2, this->height() / 2);
@@ -841,4 +854,262 @@ void MainWindow::showFullScreen() {
         radius->start();
     });*/
     radius->start();
+
+    TimerNotificationDialog = new TimerComplete(this->geometry());
+    connect(TimerNotificationDialog, &TimerComplete::finished, [=] {
+        QDBusMessage message = QDBusMessage::createMethodCall("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "CloseNotification");
+        QVariantList args;
+        args.append(closeTimerId);
+        message.setArguments(args);
+        QDBusConnection::sessionBus().call(message, QDBus::NoBlock);
+    });
+}
+
+void MainWindow::BatteriesChanged() {
+    allDevices.clear();
+    QDBusInterface *i = new QDBusInterface("org.freedesktop.UPower", "/org/freedesktop/UPower", "org.freedesktop.UPower", QDBusConnection::systemBus(), this);
+    QDBusReply<QList<QDBusObjectPath>> reply = i->call("EnumerateDevices"); //Get all devices
+
+    if (reply.isValid()) { //Check if the reply is ok
+        for (QDBusObjectPath device : reply.value()) {
+            if (device.path().contains("battery") || device.path().contains("media_player") || device.path().contains("computer") || device.path().contains("phone")) { //This is a battery or media player or tablet computer
+                QDBusConnection::systemBus().connect("org.freedesktop.UPower", device.path(),
+                                                     "org.freedesktop.DBus.Properties", "PropertiesChanged", this,
+                                                                      SLOT(DeviceChanged()));
+
+                QDBusInterface *i = new QDBusInterface("org.freedesktop.UPower", device.path(), "org.freedesktop.UPower.Device", QDBusConnection::systemBus(), this);
+                allDevices.append(i);
+            }
+        }
+        BatteryChanged();
+    } else {
+        ui->batteryFrame->setVisible(true);
+        ui->batteryLabel->setText("Can't get battery information.");
+    }
+}
+
+
+void MainWindow::BatteryChanged() {
+    QStringList displayOutput;
+
+    int batLevel;
+    bool hasPCBat = false;
+    bool isCharging;
+    for (QDBusInterface *i : allDevices) {
+        //Get the percentage of battery remaining.
+        //We do the calculation ourselves because UPower can be inaccurate sometimes
+        double percentage;
+
+        //Check that the battery actually reports energy information
+        double energyFull = i->property("EnergyFull").toDouble();
+        double energy = i->property("Energy").toDouble();
+        double energyEmpty = i->property("EnergyEmpty").toDouble();
+        if (energyFull == 0 && energy == 0 && energyEmpty == 0) {
+            //The battery does not report energy information, so get the percentage from UPower.
+            percentage = i->property("Percentage").toDouble();
+        } else {
+            //Calculate the percentage ourself, and round it to an integer.
+            //Add 0.5 because C++ always rounds down.
+            percentage = (int) (((energy - energyEmpty) / (energyFull - energyEmpty) * 100) + 0.5);
+        }
+        if (i->path().contains("battery")) {
+            //PC Battery
+            if (i->property("IsPresent").toBool()) {
+                hasPCBat = true;
+                bool showRed = false;
+                qulonglong timeToFull = i->property("TimeToFull").toULongLong();
+                qulonglong timeToEmpty = i->property("TimeToEmpty").toULongLong();
+                QDateTime timeRemain;
+
+                //Depending on the state, do different things.
+                QString state;
+                switch (i->property("State").toUInt()) {
+                case 1: //Charging
+                    state = " (" + tr("Charging");
+
+                    isCharging = true;
+
+                    if (timeToFull != 0) {
+                        timeRemain = QDateTime::fromTime_t(timeToFull).toUTC();
+                        state.append(" · " + timeRemain.toString("h:mm"));
+                    } else {
+                        timeRemain = QDateTime(QDate(0, 0, 0));
+                    }
+
+                    state += ")";
+                    break;
+                case 2: //Discharging
+                    //state = " (" + tr("Discharging");
+                    state = " (";
+
+                    if (timeToEmpty != 0) {
+                        timeRemain = QDateTime::fromTime_t(timeToEmpty).toUTC();
+                        state.append(/*" · " + */timeRemain.toString("h:mm"));
+                    } else {
+                        timeRemain = QDateTime(QDate(0, 0, 0));
+                    }
+                    state += ")";
+
+                    isCharging = false;
+                    break;
+                case 3: //Empty
+                    state = " (" + tr("Empty") + ")";
+                    break;
+                case 4: //Charged
+                case 6: //Pending Discharge
+                    state = " (" + tr("Full") + ")";
+                    timeRemain = QDateTime(QDate(0, 0, 0));
+                    isCharging = false;
+                    break;
+                case 5: //Pending Charge
+                    state = " (" + tr("Not Charging") + ")";
+                    break;
+                }
+
+                if (showRed) {
+                    displayOutput.append("<span style=\"background-color: red; color: black;\">" + tr("%1% PC Battery%2").arg(QString::number(percentage), state) + "</span>");
+                } else {
+                    displayOutput.append(tr("%1% PC Battery%2").arg(QString::number(percentage), state));
+                }
+
+                batLevel = percentage;
+            } else {
+                displayOutput.append(tr("No Battery Inserted"));
+            }
+        } else if (i->path().contains("media_player") || i->path().contains("computer") || i->path().contains("phone")) {
+            //This is an external media player (or tablet)
+            //Get the model of this media player
+            QString model = i->property("Model").toString();
+
+            if (i->property("Serial").toString().length() == 40 && i->property("Vendor").toString().contains("Apple") && QFile("/usr/bin/idevice_id").exists()) { //This is probably an iOS device
+                //Get the name of the iOS device
+                QProcess iosName;
+                iosName.start("idevice_id " + i->property("Serial").toString());
+                iosName.waitForFinished();
+
+                QString name(iosName.readAll());
+                name = name.trimmed();
+
+                if (name != "" && !name.startsWith("ERROR:")) {
+                    model = name;
+                }
+            }
+            if (i->property("State").toUInt() == 0) {
+                if (QFile("/usr/bin/thefile").exists()) {
+                    displayOutput.append(tr("Pair %1 using theFile to see battery status.").arg(model));
+                } else {
+                    displayOutput.append(tr("%1 battery unavailable. Device trusted?").arg(model));
+                }
+            } else {
+                QString batteryText;
+                batteryText.append(tr("%1% battery on %2").arg(QString::number(percentage), model));
+                switch (i->property("State").toUInt()) {
+                case 1:
+                    batteryText.append(" (" + tr("Charging") + ")");
+                    break;
+                case 2:
+                    batteryText.append(" (" + tr("Discharging") + ")");
+                    break;
+                case 3:
+                    batteryText.append(" (" + tr("Empty") + ")");
+                    break;
+                case 4:
+                case 6:
+                    batteryText.append(" (" + tr("Full") + ")");
+                    break;
+                case 5:
+                    batteryText.append(" (" + tr("Not Charging") + ")");
+                    break;
+                }
+                displayOutput.append(batteryText);
+            }
+        }
+    }
+
+    //If KDE Connect is running, check the battery status of connected devices.
+    if (QDBusConnection::sessionBus().interface()->registeredServiceNames().value().contains("org.kde.kdeconnect")) {
+        //Get connected devices
+        QDBusMessage devicesMessage = QDBusMessage::createMethodCall("org.kde.kdeconnect", "/modules/kdeconnect", "org.kde.kdeconnect.daemon", "devices");
+        devicesMessage.setArguments(QVariantList() << true);
+        QDBusReply<QStringList> connectedDevices = QDBusConnection::sessionBus().call(devicesMessage, QDBus::Block, 5000);
+        if (connectedDevices.isValid()) {
+            for (QString device : connectedDevices.value()) {
+                QDBusInterface interface("org.kde.kdeconnect", "/modules/kdeconnect/devices/" + device, "org.kde.kdeconnect.device");
+                QString name = interface.property("name").toString();
+                QDBusInterface batteryInterface("org.kde.kdeconnect", "/modules/kdeconnect/devices/" + device, "org.kde.kdeconnect.device.battery");
+                if (batteryInterface.isValid()) {
+                    QDBusReply<int> currentCharge = batteryInterface.call("charge");
+                    QDBusReply<bool> charging = batteryInterface.call("isCharging");
+
+                    if (currentCharge != -1) {
+                        QString batteryText;
+                        if (charging) {
+                            if (currentCharge == 100) {
+                                batteryText = tr("%1% battery on %2 (Full)").arg(QString::number(currentCharge), name);
+                            } else {
+                                batteryText = tr("%1% battery on %2 (Charging)").arg(QString::number(currentCharge), name);
+                            }
+                        } else {
+                            batteryText = tr("%1% battery on %2 (Discharging)").arg(QString::number(currentCharge), name);
+                        }
+                        displayOutput.append(batteryText);
+                    }
+                }
+            }
+        }
+    }
+
+    if (displayOutput.count() == 0) {
+        ui->batteryFrame->setVisible(false);
+    } else {
+        ui->batteryFrame->setVisible(true);
+        ui->batteryLabel->setText(displayOutput.join(" · "));
+
+        QString iconName;
+        if (isCharging) {
+            if (batLevel < 10) {
+                iconName = "battery-charging-empty";
+            } else if (batLevel < 30) {
+                iconName = "battery-charging-020";
+            } else if (batLevel < 50) {
+                iconName = "battery-charging-040";
+            } else if (batLevel < 70) {
+                iconName = "battery-charging-060";
+            } else if (batLevel < 90) {
+                iconName = "battery-charging-080";
+            } else {
+                iconName = "battery-charging-100";
+            }
+        } else if (theLibsGlobal::instance()->powerStretchEnabled()) {
+            if (batLevel < 10) {
+                iconName = "battery-stretch-empty";
+            } else if (batLevel < 30) {
+                iconName = "battery-stretch-020";
+            } else if (batLevel < 50) {
+                iconName = "battery-stretch-040";
+            } else if (batLevel < 70) {
+                iconName = "battery-stretch-060";
+            } else if (batLevel < 90) {
+                iconName = "battery-stretch-080";
+            } else {
+                iconName = "battery-stretch-100";
+            }
+        } else {
+            if (batLevel < 10) {
+                iconName = "battery-empty";
+            } else if (batLevel < 30) {
+                iconName = "battery-020";
+            } else if (batLevel < 50) {
+                iconName = "battery-040";
+            } else if (batLevel < 70) {
+                iconName = "battery-060";
+            } else if (batLevel < 90) {
+                iconName = "battery-080";
+            } else {
+                iconName = "battery-100";
+            }
+        }
+
+        ui->batteryIcon->setPixmap(QIcon::fromTheme(iconName).pixmap(16, 16));
+    }
 }
