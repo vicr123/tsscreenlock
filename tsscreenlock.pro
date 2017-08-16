@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui x11extras dbus multimedia thelib
+QT       += core gui x11extras dbus multimedia thelib svg
 CONFIG   += c++11
 LIBS     += -lxcb -lX11
 
@@ -15,23 +15,37 @@ TEMPLATE = app
 DBUS_ADAPTORS += org.thesuite.tsscreenlock.xml
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
     coverframe.cpp \
     topborderframe.cpp \
     notificationdbus.cpp \
     newcall.cpp \
-    timercomplete.cpp
+    timercomplete.cpp \
+    lockscreen.cpp
 
-HEADERS  += mainwindow.h \
+HEADERS  += \
     coverframe.h \
     topborderframe.h \
     notificationdbus.h \
     newcall.h \
-    timercomplete.h
+    timercomplete.h \
+    lockscreen.h
 
-FORMS    += mainwindow.ui \
+FORMS    += \
     newcall.ui \
-    timercomplete.ui
+    timercomplete.ui \
+    lockscreen.ui
 
 RESOURCES += \
     resources.qrc
+
+DISTFILES += \
+    triangles.svg
+
+unix {
+    target.path = /usr/bin
+
+    background.path = /usr/share/tsscreenlock/
+    background.files = triangles.svg
+
+    INSTALLS += target background
+}

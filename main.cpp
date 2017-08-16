@@ -2,7 +2,8 @@
 #include <QWindow>
 #include <QSound>
 #include <QDebug>
-#include "mainwindow.h"
+//#include "mainwindow.h"
+#include "lockscreen.h"
 #include "notificationdbus.h"
 
 bool capturingKeyPress = false;
@@ -12,7 +13,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     qDebug() << a.arguments();
-    if (!a.arguments().contains("--nograb")) {
+    if (!a.arguments().contains("--nograb") && !a.arguments().contains("-g")) {
         XGrabKeyboard(QX11Info::display(), RootWindow(QX11Info::display(), 0), True, GrabModeAsync, GrabModeAsync, CurrentTime);
         XGrabPointer(QX11Info::display(), RootWindow(QX11Info::display(), 0), True, None, GrabModeAsync, GrabModeAsync, RootWindow(QX11Info::display(), 0), None, CurrentTime);
     }
@@ -23,7 +24,7 @@ int main(int argc, char *argv[])
 
     NotificationDBus* notification = new NotificationDBus();
 
-    QList<MainWindow*> windows;
+    /*QList<MainWindow*> windows;
     for (int i = 0; i < a.desktop()->screenCount(); i++) {
         MainWindow* w = new MainWindow();
         w->setWindowFlags(Qt::WindowStaysOnTopHint);
@@ -33,7 +34,19 @@ int main(int argc, char *argv[])
         //w->move(a.desktop()->screenGeometry(i).x(), a.desktop()->screenGeometry(i).y());
         w->showFullScreen();
         windows.append(w);
+    }*/
+
+    QList<LockScreen*> windows;
+    for (int i = 0; i < a.desktop()->screenCount(); i++) {
+        LockScreen* w = new LockScreen();
+        w->setWindowFlags(Qt::WindowStaysOnTopHint);
+        QObject::connect(notification, SIGNAL(showNotification(QString,QString,uint,QStringList,QVariantMap)), w, SLOT(showNotification(QString,QString,uint,QStringList,QVariantMap)));
+        w->show();
+        w->setGeometry(a.desktop()->screenGeometry(i));
+        w->showFullScreen();
+        windows.append(w);
     }
+
 
     QSound* lockSound = new QSound(":/sounds/lock");
     lockSound->play();
@@ -43,7 +56,11 @@ int main(int argc, char *argv[])
     QSound* unlockSound = new QSound(":/sounds/unlock");
     unlockSound->play();
 
-    for (MainWindow* w : windows) {
+    /*for (MainWindow* w : windows) {
+        w->animateClose();
+    }*/
+
+    for (LockScreen* w : windows) {
         w->animateClose();
     }
 
