@@ -42,7 +42,7 @@ DISTFILES += \
     triangles.svg
 
 unix {
-    target.path = /usr/bin
+    target.path = /usr/lib
 
     background.path = /usr/share/tsscreenlock/
     background.files = triangles.svg
