@@ -730,6 +730,11 @@ void LockScreen::updateMpris() {
         if (!pauseMprisMenuUpdate) {
             if (mprisDetectedApps.count() > 1) {
                 QMenu* menu = ui->mprisSelection->menu();
+
+                if (menu == NULL) {
+                    menu = new QMenu();
+                }
+
                 menu->clear();
                 for (QString app : mprisDetectedApps) {
                     QAction* action = new QAction();
@@ -741,7 +746,7 @@ void LockScreen::updateMpris() {
                     action->setText(app.remove("org.mpris.MediaPlayer2."));
                     menu->addAction(action);
                 }
-                //ui->mprisSelection->setMenu(menu);
+                ui->mprisSelection->setMenu(menu);
                 ui->mprisSelection->setVisible(true);
             } else {
                 ui->mprisSelection->setVisible(false);
