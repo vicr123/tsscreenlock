@@ -28,7 +28,9 @@
 #include "timercomplete.h"
 
 #include <X11/Xlib.h>
+#include <X11/XKBlib.h>
 #undef KeyPress
+#undef KeyRelease
 
 namespace Ui {
 class LockScreen;

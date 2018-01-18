@@ -124,23 +124,77 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="password">
-           <property name="echoMode">
-            <enum>QLineEdit::Password</enum>
+          <layout class="QHBoxLayout" name="horizontalLayout_8">
+           <property name="bottomMargin">
+            <number>0</number>
            </property>
-           <property name="clearButtonEnabled">
-            <bool>true</bool>
-           </property>
-          </widget>
+           <item>
+            <widget class="QLineEdit" name="password">
+             <property name="echoMode">
+              <enum>QLineEdit::Password</enum>
+             </property>
+             <property name="clearButtonEnabled">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="capsLockOn">
+             <property name="toolTip">
+              <string>Caps Lock is on</string>
+             </property>
+             <property name="text">
+              <string notr="true">Caps Lock is on</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
          <item>
-          <widget class="QLabel" name="incorrectPassword">
-           <property name="text">
-            <string>That didn't work. Try re-entering your password.</string>
+          <widget class="QFrame" name="incorrectPasswordFrame">
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
            </property>
-           <property name="buddy">
-            <cstring></cstring>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
            </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="incorrectPasswordWarningIcon">
+              <property name="text">
+               <string notr="true">Icon</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="incorrectPassword">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>That didn't work. Try re-entering your password.</string>
+              </property>
+              <property name="buddy">
+               <cstring></cstring>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
          <item>
@@ -455,6 +509,9 @@
                 <property name="text">
                  <string notr="true">Battery</string>
                 </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
              </layout>
@@ -541,7 +598,8 @@
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset theme="media-skip-backward"/>
+                   <iconset theme="media-skip-backward">
+                    <normaloff>.</normaloff>.</iconset>
                   </property>
                   <property name="flat">
                    <bool>true</bool>
@@ -554,7 +612,8 @@
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset theme="media-playback-start"/>
+                   <iconset theme="media-playback-start">
+                    <normaloff>.</normaloff>.</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
@@ -573,7 +632,8 @@
                    <string/>
                   </property>
                   <property name="icon">
-                   <iconset theme="media-skip-forward"/>
+                   <iconset theme="media-skip-forward">
+                    <normaloff>.</normaloff>.</iconset>
                   </property>
                   <property name="flat">
                    <bool>true</bool>

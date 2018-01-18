@@ -66,10 +66,18 @@ LockScreen::LockScreen(QWidget *parent) :
     QDBusConnection::systemBus().connect("org.freedesktop.UPower", "/org/freedesktop/UPower", "org.freedesktop.UPower", "DeviceRemoved", this, SLOT(BatteriesChanged()));
     QDBusConnection::sessionBus().connect("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "NotificationClosed", this, SLOT(closeNotification(uint,uint)));
 
-    ui->incorrectPassword->setVisible(false);
+    ui->incorrectPasswordFrame->setVisible(false);
+    ui->incorrectPasswordWarningIcon->setPixmap(QIcon::fromTheme("dialog-warning").pixmap(16, 16));
+    ui->capsLockOn->setPixmap(QIcon::fromTheme("input-caps-on").pixmap(16, 16));
     ui->password->installEventFilter(this);
     ui->mprisIcon->setPixmap(QIcon::fromTheme("audio").pixmap(32, 32));
     this->setWindowOpacity(0);
+
+    unsigned int capsState;
+    XkbGetIndicatorState(QX11Info::display(), XkbUseCoreKbd, &capsState);
+    if ((capsState & 0x01) != 1) {
+        ui->capsLockOn->setVisible(false);
+    }
 
     passwordFrameOpacity = new QGraphicsOpacityEffect();
     passwordFrameOpacity->setOpacity(0);
@@ -206,6 +214,14 @@ bool LockScreen::eventFilter(QObject *obj, QEvent *e) {
             if (!coverHidden) {
                 hideCover();
                 return true;
+            }
+        } else if (e->type() == QEvent::KeyRelease) {
+            unsigned int capsState;
+            XkbGetIndicatorState(QX11Info::display(), XkbUseCoreKbd, &capsState);
+            if ((capsState & 0x01) == 1) {
+                ui->capsLockOn->setVisible(true);
+            } else {
+                ui->capsLockOn->setVisible(false);
             }
         }
     }
@@ -403,18 +419,20 @@ void LockScreen::BatteryChanged() {
                     QDBusReply<int> currentCharge = batteryInterface.call("charge");
                     QDBusReply<bool> charging = batteryInterface.call("isCharging");
 
-                    if (currentCharge != -1) {
-                        QString batteryText;
-                        if (charging) {
-                            if (currentCharge == 100) {
-                                batteryText = tr("%1% battery on %2 (Full)").arg(QString::number(currentCharge), name);
+                    if (currentCharge.isValid()) {
+                        if (currentCharge != -1) {
+                            QString batteryText;
+                            if (charging) {
+                                if (currentCharge == 100) {
+                                    batteryText = tr("%1% battery on %2 (Full)").arg(QString::number(currentCharge), name);
+                                } else {
+                                    batteryText = tr("%1% battery on %2 (Charging)").arg(QString::number(currentCharge), name);
+                                }
                             } else {
-                                batteryText = tr("%1% battery on %2 (Charging)").arg(QString::number(currentCharge), name);
+                                batteryText = tr("%1% battery on %2 (Discharging)").arg(QString::number(currentCharge), name);
                             }
-                        } else {
-                            batteryText = tr("%1% battery on %2 (Discharging)").arg(QString::number(currentCharge), name);
+                            displayOutput.append(batteryText);
                         }
-                        displayOutput.append(batteryText);
                     }
                 }
             }
@@ -575,7 +593,7 @@ void LockScreen::on_unlockButton_clicked()
             QApplication::processEvents();
         }
 
-        ui->incorrectPassword->setVisible(true);
+        ui->incorrectPasswordFrame->setVisible(true);
         ui->password->setText("");
     }
 

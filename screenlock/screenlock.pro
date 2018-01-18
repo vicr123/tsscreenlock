@@ -5,10 +5,14 @@
 #-------------------------------------------------
 
 QT       += core gui x11extras dbus multimedia thelib svg
-CONFIG   += c++11
-LIBS     += -lxcb -lX11
+CONFIG   += c++14
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+unix {
+    CONFIG += link_pkgconfig
+    PKGCONFIG += x11 xcb
+}
 
 TARGET = tsscreenlock
 TEMPLATE = app
