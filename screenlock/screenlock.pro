@@ -46,6 +46,8 @@ DISTFILES += \
     triangles.svg
 
 unix {
+    QMAKE_STRIP = echo
+
     target.path = /usr/lib
 
     background.path = /usr/share/tsscreenlock/
