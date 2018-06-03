@@ -2,15 +2,45 @@
 #include <QWindow>
 #include <QSound>
 #include <QDebug>
+#include <QTranslator>
+#include <QLibraryInfo>
 //#include "mainwindow.h"
 #include "lockscreen.h"
 #include "notificationdbus.h"
 
 bool capturingKeyPress = false;
+QList<LockScreen*> windows;
+NotificationDBus* notification;
+
+void openLockWindows() {
+    for (LockScreen* w : windows) {
+        w->close();
+        //w->deleteLater();
+    }
+    windows.clear();
+
+    for (int i = 0; i < QApplication::desktop()->screenCount(); i++) {
+        LockScreen* w = new LockScreen();
+        w->setWindowFlags(Qt::WindowStaysOnTopHint);
+        QObject::connect(notification, SIGNAL(showNotification(QString,QString,uint,QStringList,QVariantMap)), w, SLOT(showNotification(QString,QString,uint,QStringList,QVariantMap)));
+        w->show();
+        w->setGeometry(QApplication::desktop()->screenGeometry(i));
+        w->showFullScreen();
+        windows.append(w);
+    }
+}
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    QTranslator *qtTranslator = new QTranslator;
+    qtTranslator->load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+    a.installTranslator(qtTranslator);
+
+    QTranslator *tsTranslator = new QTranslator;
+    tsTranslator->load(QLocale::system().name(), QString(SHAREDIR) + "translations");
+    a.installTranslator(tsTranslator);
 
     qDebug() << a.arguments();
     if (!a.arguments().contains("--nograb") && !a.arguments().contains("-g")) {
@@ -22,7 +52,7 @@ int main(int argc, char *argv[])
     a.setOrganizationDomain("");
     a.setApplicationName("tsscreenlock");
 
-    NotificationDBus* notification = new NotificationDBus();
+    notification = new NotificationDBus();
 
     /*QList<MainWindow*> windows;
     for (int i = 0; i < a.desktop()->screenCount(); i++) {
@@ -36,17 +66,10 @@ int main(int argc, char *argv[])
         windows.append(w);
     }*/
 
-    QList<LockScreen*> windows;
-    for (int i = 0; i < a.desktop()->screenCount(); i++) {
-        LockScreen* w = new LockScreen();
-        w->setWindowFlags(Qt::WindowStaysOnTopHint);
-        QObject::connect(notification, SIGNAL(showNotification(QString,QString,uint,QStringList,QVariantMap)), w, SLOT(showNotification(QString,QString,uint,QStringList,QVariantMap)));
-        w->show();
-        w->setGeometry(a.desktop()->screenGeometry(i));
-        w->showFullScreen();
-        windows.append(w);
-    }
+    openLockWindows();
 
+    QObject::connect(QApplication::desktop(), &QDesktopWidget::screenCountChanged, &openLockWindows);
+    QObject::connect(QApplication::desktop(), &QDesktopWidget::resized, &openLockWindows);
 
     QSound* lockSound = new QSound(":/sounds/lock");
     lockSound->play();
@@ -55,10 +78,6 @@ int main(int argc, char *argv[])
 
     QSound* unlockSound = new QSound(":/sounds/unlock");
     unlockSound->play();
-
-    /*for (MainWindow* w : windows) {
-        w->animateClose();
-    }*/
 
     for (LockScreen* w : windows) {
         w->animateClose();
@@ -69,4 +88,9 @@ int main(int argc, char *argv[])
     }
 
     return ret;
+}
+
+float getDPIScaling() {
+    float currentDPI = QApplication::desktop()->logicalDpiX();
+    return currentDPI / (float) 96;
 }

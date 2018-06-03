@@ -25,12 +25,20 @@
 #include <QMenu>
 #include <QLineEdit>
 #include <QGraphicsOpacityEffect>
+#include <QStackedWidget>
+#include <QDir>
+#include <QListWidgetItem>
+#include <unistd.h>
+#include <ttoast.h>
 #include "timercomplete.h"
+#include "switchuserlistdelegate.h"
 
 #include <X11/Xlib.h>
 #include <X11/XKBlib.h>
+#include <X11/extensions/XInput.h>
 #undef KeyPress
 #undef KeyRelease
+#undef Bool
 
 namespace Ui {
 class LockScreen;
@@ -86,7 +94,23 @@ private slots:
 
     void on_switchUserButton_clicked();
 
-private:
+    void on_passwordButton_toggled(bool checked);
+
+    void on_mousePasswordButton_toggled(bool checked);
+
+    void on_loginStack_currentChanged(int arg1);
+
+    void checkMousePassword();
+
+    void on_retryMousePasswordButton_clicked();
+
+    void on_backToLogin_clicked();
+
+    void on_newSessionButton_clicked();
+
+    void on_availableUsersList_itemActivated(QListWidgetItem *item);
+
+    private:
     Ui::LockScreen *ui;
 
     int moveY;
@@ -113,6 +137,10 @@ private:
 
     QList<QDBusInterface*> allDevices;
     QGraphicsOpacityEffect* passwordFrameOpacity;
+
+    QString mousePassword;
+    QByteArray currentMousePassword;
+    int mousePasswordWrongCount = 0;
 
     QSettings settings;
 };

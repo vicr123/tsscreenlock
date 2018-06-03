@@ -16,7 +16,7 @@ unix {
     target.path = /usr/bin
 
     suid.path = /usr/bin
-    suid.extra = chmod u+s tscheckpass
+    suid.extra = chmod u+s $(INSTALL_ROOT)/usr/bin/tscheckpass
 
     INSTALLS += target suid
 }

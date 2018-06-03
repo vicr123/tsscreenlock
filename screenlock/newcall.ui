@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string notr="true">Dialog</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
@@ -22,7 +22,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Incoming Call</string>
+      <string notr="true">Incoming Call</string>
      </property>
     </widget>
    </item>
@@ -34,7 +34,7 @@
       </font>
      </property>
      <property name="text">
-      <string>0412345678</string>
+      <string notr="true">0412345678</string>
      </property>
     </widget>
    </item>
@@ -86,7 +86,8 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset theme="call-start"/>
+        <iconset theme="call-start">
+         <normaloff>.</normaloff>.</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -118,7 +119,8 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset theme="call-stop"/>
+        <iconset theme="call-stop">
+         <normaloff>.</normaloff>.</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -150,7 +152,8 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset theme="audio-volume-muted"/>
+        <iconset theme="audio-volume-muted">
+         <normaloff>.</normaloff>.</iconset>
        </property>
        <property name="iconSize">
         <size>
