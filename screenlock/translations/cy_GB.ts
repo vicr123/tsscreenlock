@@ -86,125 +86,125 @@
         <translation>Agor</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="42"/>
-        <location filename="../lockscreen.cpp" line="43"/>
-        <location filename="../lockscreen.cpp" line="45"/>
-        <location filename="../lockscreen.cpp" line="46"/>
+        <location filename="../lockscreen.cpp" line="47"/>
+        <location filename="../lockscreen.cpp" line="48"/>
+        <location filename="../lockscreen.cpp" line="50"/>
+        <location filename="../lockscreen.cpp" line="51"/>
         <source>Hello %1!</source>
         <translation>Helo %1!</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="53"/>
+        <location filename="../lockscreen.cpp" line="58"/>
         <source>Resume your session, continuing where you left off</source>
         <translation>Ailglydwch eich sesiwn, yn parhau ble cwplwych chi</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="55"/>
+        <location filename="../lockscreen.cpp" line="60"/>
         <source>Enter your password and resume your session, continuing where you left off</source>
         <translation>Typiwch eich cyfrynair ac ailglydio yn eich sesiwn, yn parhau ble cwplawch chi</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="353"/>
+        <location filename="../lockscreen.cpp" line="358"/>
         <source>Mouse Password is disabled</source>
         <translation>Mae cyfrinair llygoden ddim yna</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="442"/>
-        <location filename="../lockscreen.cpp" line="522"/>
+        <location filename="../lockscreen.cpp" line="447"/>
+        <location filename="../lockscreen.cpp" line="527"/>
         <source>Charging</source>
         <translation>Chargio</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="470"/>
-        <location filename="../lockscreen.cpp" line="528"/>
+        <location filename="../lockscreen.cpp" line="475"/>
+        <location filename="../lockscreen.cpp" line="533"/>
         <source>Empty</source>
         <translation>Gwag</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="474"/>
-        <location filename="../lockscreen.cpp" line="532"/>
+        <location filename="../lockscreen.cpp" line="479"/>
+        <location filename="../lockscreen.cpp" line="537"/>
         <source>Full</source>
         <translation>Llawn</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="479"/>
-        <location filename="../lockscreen.cpp" line="535"/>
+        <location filename="../lockscreen.cpp" line="484"/>
+        <location filename="../lockscreen.cpp" line="540"/>
         <source>Not Charging</source>
         <translation>Ddim yn chargio</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="484"/>
-        <location filename="../lockscreen.cpp" line="486"/>
+        <location filename="../lockscreen.cpp" line="489"/>
+        <location filename="../lockscreen.cpp" line="491"/>
         <source>%1% PC Battery%2</source>
         <translation>%1% Batteri Cyfrifiadur%2</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="491"/>
+        <location filename="../lockscreen.cpp" line="496"/>
         <source>No Battery Inserted</source>
         <translation>Ddim battri</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="513"/>
+        <location filename="../lockscreen.cpp" line="518"/>
         <source>Pair %1 using theFile to see battery status.</source>
         <translation>Par %1 yn ddefnyddio theFile i weld statws y batri.</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="515"/>
+        <location filename="../lockscreen.cpp" line="520"/>
         <source>%1 battery unavailable. Device trusted?</source>
         <translation>%1 Battri ddim ar gael, dyfais gellir ymddiried ynddo?</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="519"/>
+        <location filename="../lockscreen.cpp" line="524"/>
         <source>%1% battery on %2</source>
         <translation>%1% batri ar %2</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="525"/>
+        <location filename="../lockscreen.cpp" line="530"/>
         <source>Discharging</source>
         <translation>Ddim yn chargio</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="564"/>
+        <location filename="../lockscreen.cpp" line="569"/>
         <source>%1% battery on %2 (Full)</source>
         <translation>%1% batri ar %2(Llawn)</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="566"/>
+        <location filename="../lockscreen.cpp" line="571"/>
         <source>%1% battery on %2 (Charging)</source>
         <translation>%1% batri ar %2 (Chargio)</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="569"/>
+        <location filename="../lockscreen.cpp" line="574"/>
         <source>%1% battery on %2 (Discharging)</source>
         <translation>%1% batri ar %2 (Ddim yn chargio)</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="744"/>
+        <location filename="../lockscreen.cpp" line="749"/>
         <source>Incorrect Password</source>
         <translation>Cyfrynair Anghywir</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="745"/>
+        <location filename="../lockscreen.cpp" line="750"/>
         <source>The password you entered was incorrect. Please enter your password again.</source>
         <translation>Mae y cyfrynair rydych chi wedi cofnodi ddim yn gywir. Gallwch cofnodi eich cyfrynair eto.</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="1131"/>
+        <location filename="../lockscreen.cpp" line="1136"/>
         <source>%1 on X11 display %2</source>
         <translation>%1 ar arddangos X11 %2</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="1133"/>
+        <location filename="../lockscreen.cpp" line="1138"/>
         <source>on %1</source>
         <translation>ar %1</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="1135"/>
+        <location filename="../lockscreen.cpp" line="1140"/>
         <source>%1 on VT #%2</source>
         <translation>%1 ar VT #%2</translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="1137"/>
+        <location filename="../lockscreen.cpp" line="1142"/>
         <source>Session</source>
         <translation>Sesiwn</translation>
     </message>
