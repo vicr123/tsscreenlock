@@ -112,36 +112,36 @@
         <location filename="../lockscreen.cpp" line="447"/>
         <location filename="../lockscreen.cpp" line="527"/>
         <source>Charging</source>
-        <translation type="unfinished"></translation>
+        <translation>Sạc pin</translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="475"/>
         <location filename="../lockscreen.cpp" line="533"/>
         <source>Empty</source>
-        <translation type="unfinished"></translation>
+        <translation>Hết pin</translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="479"/>
         <location filename="../lockscreen.cpp" line="537"/>
         <source>Full</source>
-        <translation type="unfinished"></translation>
+        <translation>Pin đầy đủ</translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="484"/>
         <location filename="../lockscreen.cpp" line="540"/>
         <source>Not Charging</source>
-        <translation type="unfinished"></translation>
+        <translation>Không sạc</translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="489"/>
         <location filename="../lockscreen.cpp" line="491"/>
         <source>%1% PC Battery%2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1% Pin%2</translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="496"/>
         <source>No Battery Inserted</source>
-        <translation type="unfinished"></translation>
+        <translation>Không có pin</translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="518"/>
@@ -156,27 +156,27 @@
     <message>
         <location filename="../lockscreen.cpp" line="524"/>
         <source>%1% battery on %2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1% pin ở %2</translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="530"/>
         <source>Discharging</source>
-        <translation type="unfinished"></translation>
+        <translation>Xài pin</translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="569"/>
         <source>%1% battery on %2 (Full)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1% pin ở %2 (Pin đầy đủ)</translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="571"/>
         <source>%1% battery on %2 (Charging)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1% pin ở %2 (Sạc pin)</translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="574"/>
         <source>%1% battery on %2 (Discharging)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1% pin ở %2 (Xài pin)</translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="749"/>
@@ -191,17 +191,17 @@
     <message>
         <location filename="../lockscreen.cpp" line="1136"/>
         <source>%1 on X11 display %2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 ở màn hình X11 %2</translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="1138"/>
         <source>on %1</source>
-        <translation type="unfinished"></translation>
+        <translation>ở %1</translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="1140"/>
         <source>%1 on VT #%2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 ở VT #%2</translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="1142"/>
