@@ -43,7 +43,7 @@
     <message>
         <location filename="../lockscreen.ui" line="336"/>
         <source>Caps Lock is on</source>
-        <translation type="unfinished"></translation>
+        <translation>Caps Lock đang bật</translation>
     </message>
     <message>
         <location filename="../lockscreen.ui" line="502"/>
@@ -73,7 +73,7 @@
     <message>
         <location filename="../lockscreen.ui" line="839"/>
         <source>New Session</source>
-        <translation type="unfinished"></translation>
+        <translation>Phiên mới</translation>
     </message>
     <message>
         <location filename="../lockscreen.ui" line="864"/>
