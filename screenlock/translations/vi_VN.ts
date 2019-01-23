@@ -7,7 +7,7 @@
         <location filename="../lockscreen.ui" line="69"/>
         <location filename="../lockscreen.ui" line="761"/>
         <source>theShell</source>
-        <translation type="unfinished"></translation>
+        <translation>theShell</translation>
     </message>
     <message>
         <location filename="../lockscreen.ui" line="100"/>
@@ -219,7 +219,7 @@
     <message>
         <location filename="../timercomplete.ui" line="66"/>
         <source>Stops the timer from making sounds</source>
-        <translation type="unfinished"></translation>
+        <translation>Bắt bộ hẹn giờ im</translation>
     </message>
     <message>
         <location filename="../timercomplete.ui" line="111"/>
