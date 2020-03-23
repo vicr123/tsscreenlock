@@ -41,108 +41,81 @@
 #undef Bool
 
 namespace Ui {
-class LockScreen;
+    class LockScreen;
 }
 
-class LockScreen : public QDialog
-{
-    Q_OBJECT
+struct LockScreenPrivate;
+class LockScreen : public QDialog {
+        Q_OBJECT
 
-public:
-    explicit LockScreen(QWidget *parent = 0);
-    ~LockScreen();
+    public:
+        explicit LockScreen(QWidget* parent = nullptr);
+        ~LockScreen();
 
-public slots:
-    void hideCover();
+    public slots:
+        void hideCover();
 
-    void showCover();
+        void showCover();
 
-    void showFullScreen();
+        void showFullScreen();
 
-    void showNotification(QString summary, QString body, uint id, QStringList actions, QVariantMap hints);
+        void showNotification(QString summary, QString body, uint id, QStringList actions, QVariantMap hints);
 
-    void closeNotification(uint id, uint reason);
+        void closeNotification(uint id, uint reason);
 
-    void animateClose();
+        void animateClose();
 
-private slots:
-    void tick();
+    private slots:
+        void on_goBackButton_clicked();
 
-    void BatteriesChanged();
+        void on_unlockButton_clicked();
 
-    void BatteryChanged();
+        void on_password_returnPressed();
 
-    void on_goBackButton_clicked();
+        void on_TurnOffScreenButton_clicked();
 
-    void on_unlockButton_clicked();
+        void on_SuspendButton_clicked();
 
-    void on_password_returnPressed();
+        void on_switchUserButton_clicked();
 
-    void on_TurnOffScreenButton_clicked();
+        void on_passwordButton_toggled(bool checked);
 
-    void mprisCheckTimer();
+        void on_mousePasswordButton_toggled(bool checked);
 
-    void updateMpris();
+        void on_loginStack_currentChanged(int arg1);
 
-    void on_mprisPlay_clicked();
+        void checkMousePassword();
 
-    void on_mprisNext_clicked();
+        void on_retryMousePasswordButton_clicked();
 
-    void on_mprisBack_clicked();
+        void on_backToLogin_clicked();
 
-    void on_SuspendButton_clicked();
+        void on_newSessionButton_clicked();
 
-    void on_switchUserButton_clicked();
-
-    void on_passwordButton_toggled(bool checked);
-
-    void on_mousePasswordButton_toggled(bool checked);
-
-    void on_loginStack_currentChanged(int arg1);
-
-    void checkMousePassword();
-
-    void on_retryMousePasswordButton_clicked();
-
-    void on_backToLogin_clicked();
-
-    void on_newSessionButton_clicked();
-
-    void on_availableUsersList_itemActivated(QListWidgetItem *item);
+        void on_availableUsersList_itemActivated(QListWidgetItem* item);
 
     private:
-    Ui::LockScreen *ui;
+        Ui::LockScreen* ui;
+        LockScreenPrivate* d;
 
-    int moveY;
-    bool coverHidden = false;
+        int notificationHeight = 0;
+        QMap<uint, QFrame*> notificationFrames;
+        QString actionToEmit = "";
+        uint idToEmit = -1;
 
-    QString background;
-    QPixmap image;
+        TimerComplete* TimerNotificationDialog;
+        uint closeTimerId;
 
-    QString mprisCurrentAppName = "";
-    QStringList mprisDetectedApps;
-    bool pauseMprisMenuUpdate = false;
+        bool eventFilter(QObject* obj, QEvent* e);
+        void keyPressEvent(QKeyEvent* event);
 
-    int notificationHeight = 0;
-    QMap<uint, QFrame*> notificationFrames;
-    QString actionToEmit = "";
-    uint idToEmit = -1;
+        QGraphicsOpacityEffect* passwordFrameOpacity;
 
-    TimerComplete* TimerNotificationDialog;
-    uint closeTimerId;
+        QString mousePassword;
+        QByteArray currentMousePassword;
+        int mousePasswordWrongCount = 0;
 
-    bool eventFilter(QObject *obj, QEvent *e);
-    void resizeEvent(QResizeEvent* event);
-    void keyPressEvent(QKeyEvent* event);
-
-    QList<QDBusInterface*> allDevices;
-    QGraphicsOpacityEffect* passwordFrameOpacity;
-
-    QString mousePassword;
-    QByteArray currentMousePassword;
-    int mousePasswordWrongCount = 0;
-
-    QSettings settings;
+        QSettings settings;
 };
 
 #endif // LOCKSCREEN_H

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui x11extras dbus multimedia thelib svg
+QT       += core gui x11extras dbus multimedia thelib svg tdesktopenvironment
 CONFIG   += c++14
 LIBS     += -lcrypt
 
@@ -57,7 +57,8 @@ TRANSLATIONS += translations/vi_VN.ts \
     translations/de_DE.ts \
     translations/da_DK.ts \
     translations/cy_GB.ts \
-    translations/nl_NL.ts
+    translations/nl_NL.ts \
+    translations/sv_SE.ts
 
 unix {
     QMAKE_STRIP = echo
