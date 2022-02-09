@@ -1,10 +1,9 @@
-#include <QApplication>
+#include <tapplication.h>
 #include <QWindow>
 #include <QSound>
 #include <QDebug>
 #include <QTranslator>
 #include <QLibraryInfo>
-//#include "mainwindow.h"
 #include "lockscreen.h"
 #include "notificationdbus.h"
 
@@ -22,7 +21,7 @@ void openLockWindows() {
     for (int i = 0; i < QApplication::desktop()->screenCount(); i++) {
         LockScreen* w = new LockScreen();
         w->setWindowFlags(Qt::WindowStaysOnTopHint);
-        QObject::connect(notification, SIGNAL(showNotification(QString,QString,uint,QStringList,QVariantMap)), w, SLOT(showNotification(QString,QString,uint,QStringList,QVariantMap)));
+        QObject::connect(notification, SIGNAL(showNotification(QString, QString, uint, QStringList, QVariantMap)), w, SLOT(showNotification(QString, QString, uint, QStringList, QVariantMap)));
         w->show();
         w->setGeometry(QApplication::desktop()->screenGeometry(i));
         w->showFullScreen();
@@ -30,20 +29,19 @@ void openLockWindows() {
     }
 }
 
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
+int main(int argc, char* argv[]) {
+    tApplication a(argc, argv);
 
-    QTranslator *qtTranslator = new QTranslator;
+    QTranslator* qtTranslator = new QTranslator;
     qtTranslator->load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
     a.installTranslator(qtTranslator);
 
-    QTranslator *tsTranslator = new QTranslator;
+    QTranslator* tsTranslator = new QTranslator;
     tsTranslator->load(QLocale::system().name(), QString(SHAREDIR) + "translations");
     a.installTranslator(tsTranslator);
 
     qDebug() << a.arguments();
-    if (!a.arguments().contains("--nograb") && !a.arguments().contains("-g")) {
+    if (!a.arguments().contains("--nograb") && !a.arguments().contains("-g") && QX11Info::isPlatformX11()) {
         XGrabKeyboard(QX11Info::display(), RootWindow(QX11Info::display(), 0), True, GrabModeAsync, GrabModeAsync, CurrentTime);
         XGrabPointer(QX11Info::display(), RootWindow(QX11Info::display(), 0), True, None, GrabModeAsync, GrabModeAsync, RootWindow(QX11Info::display(), 0), None, CurrentTime);
     }

@@ -7,6 +7,7 @@
 QT       += core gui x11extras dbus multimedia thelib svg tdesktopenvironment
 CONFIG   += c++14
 LIBS     += -lcrypt
+SHARE_APP_NAME=tsscreenlock
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -61,15 +62,18 @@ TRANSLATIONS += translations/vi_VN.ts \
     translations/sv_SE.ts
 
 unix {
+    # Include the-libs build tools
+    equals(THELIBS_BUILDTOOLS_PATH, "") {
+        THELIBS_BUILDTOOLS_PATH = $$[QT_INSTALL_PREFIX]/share/the-libs/pri
+    }
+    include($$THELIBS_BUILDTOOLS_PATH/buildmaster.pri)
+
     QMAKE_STRIP = echo
 
-    target.path = /usr/lib
+    target.path = $$THELIBS_INSTALL_LIB
 
-    background.path = /usr/share/tsscreenlock/
+    background.path = $$THELIBS_INSTALL_PREFIX/share/tsscreenlock/
     background.files = triangles.svg
 
-    translations.path = /usr/share/tsscreenlock/translations
-    translations.files = translations/*
-
-    INSTALLS += target background translations
+    INSTALLS += target background
 }

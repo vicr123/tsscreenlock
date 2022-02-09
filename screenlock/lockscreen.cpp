@@ -17,14 +17,17 @@ LockScreen::LockScreen(QWidget* parent) :
     d = new LockScreenPrivate();
     d->slide = new SystemSlide(this);
 
-    connect(d->slide, &SystemSlide::deactivated, [ = ] {
+    QDBusInterface hostnamed("org.freedesktop.hostname1", "/org/freedesktop/hostname1", "org.freedesktop.hostname1", QDBusConnection::systemBus());
+    ui->hostnameLabel->setText(hostnamed.property("PrettyHostname").toString());
+
+    connect(d->slide, &SystemSlide::deactivated, this, [ = ] {
         QString name = qgetenv("USER");
         if (name.isEmpty()) {
             name = qgetenv("USERNAME");
         }
 
         QProcess* tscheckpass = new QProcess();
-        tscheckpass->start("tscheckpass " + name);
+        tscheckpass->start("tscheckpass", {name});
         tscheckpass->waitForFinished();
         if (tscheckpass->exitCode() == 0) {
             QApplication::exit(0);
@@ -38,7 +41,7 @@ LockScreen::LockScreen(QWidget* parent) :
         connect(opacity, SIGNAL(finished()), opacity, SLOT(deleteLater()));
         opacity->start();
 
-        QTimer::singleShot(100, [ = ] {
+        QTimer::singleShot(100, this, [ = ] {
             ui->MouseUnderline->startAnimation();
             ui->PasswordUnderline->startAnimation();
         });
@@ -55,7 +58,7 @@ LockScreen::LockScreen(QWidget* parent) :
     }
 
     QProcess* fullNameProc = new QProcess(this);
-    fullNameProc->start("getent passwd " + name);
+    fullNameProc->start("getent", {"passwd", name});
     fullNameProc->waitForFinished();
     QString parseName(fullNameProc->readAll());
     delete fullNameProc;
@@ -75,7 +78,7 @@ LockScreen::LockScreen(QWidget* parent) :
 
     QString description;
     QProcess* tscheckpass = new QProcess();
-    tscheckpass->start("tscheckpass " + name);
+    tscheckpass->start("tscheckpass", {name});
     tscheckpass->waitForFinished();
     if (tscheckpass->exitCode() == 0) {
         description = tr("Resume your session, continuing where you left off");
@@ -92,10 +95,12 @@ LockScreen::LockScreen(QWidget* parent) :
     ui->password->installEventFilter(this);
     this->setWindowOpacity(0);
 
-    unsigned int capsState;
-    XkbGetIndicatorState(QX11Info::display(), XkbUseCoreKbd, &capsState);
-    if ((capsState & 0x01) != 1) {
-        ui->capsLockOn->setVisible(false);
+    if (QX11Info::isPlatformX11()) {
+        unsigned int capsState;
+        XkbGetIndicatorState(QX11Info::display(), XkbUseCoreKbd, &capsState);
+        if ((capsState & 0x01) != 1) {
+            ui->capsLockOn->setVisible(false);
+        }
     }
 
     passwordFrameOpacity = new QGraphicsOpacityEffect();
@@ -125,6 +130,8 @@ LockScreen::LockScreen(QWidget* parent) :
         if (DesktopWm::msecsIdle() >= 60000) DesktopWm::setScreenOff(true);
     });
     d->sleepTimer->start();
+
+    DesktopWm::setSystemWindow(this, DesktopWm::SystemWindowTypeLockScreen);
 }
 
 LockScreen::~LockScreen() {
@@ -140,14 +147,14 @@ void LockScreen::showFullScreen() {
     anim->setEndValue(1.0);
     anim->setDuration(500);
     anim->setEasingCurve(QEasingCurve::OutCubic);
-    connect(anim, &tVariantAnimation::valueChanged, [ = ](QVariant value) {
+    connect(anim, &tVariantAnimation::valueChanged, this, [ = ](QVariant value) {
         this->setWindowOpacity(value.toReal());
     });
     connect(anim, SIGNAL(finished()), anim, SLOT(deleteLater()));
     anim->start();
 
     TimerNotificationDialog = new TimerComplete(this->geometry());
-    connect(TimerNotificationDialog, &TimerComplete::finished, [ = ] {
+    connect(TimerNotificationDialog, &TimerComplete::finished, this, [ = ] {
         QDBusMessage message = QDBusMessage::createMethodCall("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "CloseNotification");
         QVariantList args;
         args.append(closeTimerId);
@@ -166,17 +173,19 @@ void LockScreen::showFullScreen() {
         mousePassword = mousePasswordFile.readAll().trimmed();
 
         //Make sure a mouse is connected
-        int devicesCount;
-        XDeviceInfo* deviceList = XListInputDevices(QX11Info::display(), &devicesCount);
-
         bool mouseFound = false;
-        for (int i = 0; i < devicesCount; i++) {
-            XDeviceInfo device = deviceList[i];
-            if (device.type == XInternAtom(QX11Info::display(), XI_MOUSE, True) || device.type == XInternAtom(QX11Info::display(), XI_TRACKBALL, True)) {
-                mouseFound = true;
+        if (QX11Info::isPlatformX11()) {
+            int devicesCount;
+            XDeviceInfo* deviceList = XListInputDevices(QX11Info::display(), &devicesCount);
+
+            for (int i = 0; i < devicesCount; i++) {
+                XDeviceInfo device = deviceList[i];
+                if (device.type == XInternAtom(QX11Info::display(), XI_MOUSE, True) || device.type == XInternAtom(QX11Info::display(), XI_TRACKBALL, True)) {
+                    mouseFound = true;
+                }
             }
+            XFreeDeviceList(deviceList);
         }
-        XFreeDeviceList(deviceList);
 
         if (mouseFound) {
             //Go to Mouse Password frame
@@ -209,12 +218,14 @@ bool LockScreen::eventFilter(QObject* obj, QEvent* e) {
                 return true;
             }
         } else if (e->type() == QEvent::KeyRelease) {
-            unsigned int capsState;
-            XkbGetIndicatorState(QX11Info::display(), XkbUseCoreKbd, &capsState);
-            if ((capsState & 0x01) == 1) {
-                ui->capsLockOn->setVisible(true);
-            } else {
-                ui->capsLockOn->setVisible(false);
+            if (QX11Info::isPlatformX11()) {
+                unsigned int capsState;
+                XkbGetIndicatorState(QX11Info::display(), XkbUseCoreKbd, &capsState);
+                if ((capsState & 0x01) == 1) {
+                    ui->capsLockOn->setVisible(true);
+                } else {
+                    ui->capsLockOn->setVisible(false);
+                }
             }
         }
     } else if (obj == ui->MousePasswordPage) {
@@ -303,8 +314,11 @@ void LockScreen::checkMousePassword() {
         ui->mousePasswordEchoLabel->setText(QString(currentMousePassword.count(), QChar(0x2022 /* Bullet character */)));
         if (strcmp(crypt(currentMousePassword.data(), mousePassword.toLocal8Bit().data()), mousePassword.toLocal8Bit().data()) == 0) {
             //Allow access
-            XUngrabKeyboard(QX11Info::display(), CurrentTime);
-            XUngrabPointer(QX11Info::display(), CurrentTime);
+
+            if (QX11Info::isPlatformX11()) {
+                XUngrabKeyboard(QX11Info::display(), CurrentTime);
+                XUngrabPointer(QX11Info::display(), CurrentTime);
+            }
 
             QApplication::exit();
         }
@@ -338,11 +352,13 @@ void LockScreen::on_unlockButton_clicked() {
     }
 
     QProcess tscheckpass;
-    tscheckpass.start("tscheckpass " + name + " " + ui->password->text());
+    tscheckpass.start("tscheckpass", {name, ui->password->text()});
     tscheckpass.waitForFinished();
     if (tscheckpass.exitCode() == 0) {
-        XUngrabKeyboard(QX11Info::display(), CurrentTime);
-        XUngrabPointer(QX11Info::display(), CurrentTime);
+        if (QX11Info::isPlatformX11()) {
+            XUngrabKeyboard(QX11Info::display(), CurrentTime);
+            XUngrabPointer(QX11Info::display(), CurrentTime);
+        }
 
         /*if (idToEmit != -1) {
             QDBusMessage message = QDBusMessage::createMethodCall("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "invokeAction");

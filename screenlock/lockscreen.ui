@@ -79,9 +79,9 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QLabel" name="label_7">
+           <widget class="QLabel" name="hostnameLabel">
             <property name="text">
-             <string>theShell</string>
+             <string notr="true">Lock Screen</string>
             </property>
             <property name="margin">
              <number>3</number>

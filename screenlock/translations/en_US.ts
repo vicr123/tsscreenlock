@@ -1,88 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="nl_NL">
+<TS version="2.1" sourcelanguage="en_US">
 <context>
     <name>LockScreen</name>
     <message>
         <location filename="../lockscreen.ui" line="777"/>
         <source>theShell</source>
-        <translation>theShell</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.ui" line="115"/>
         <location filename="../lockscreen.ui" line="808"/>
         <source>Back</source>
-        <translation>Terug</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.ui" line="146"/>
         <source>Unlock Session</source>
-        <translation>Ontgrendel sessie</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.ui" line="165"/>
         <source>Switch User</source>
-        <translation>Wissel van gebruiker</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.ui" line="191"/>
         <source>Suspend</source>
-        <translation>Onderbreken</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.ui" line="214"/>
         <source>Turn Off Screen</source>
-        <translation>Zet het scherm uit</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.ui" line="294"/>
         <source>Please enter your password</source>
-        <translation>Voer alstublieft uw wachtwoord in</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.ui" line="351"/>
         <source>Caps Lock is on</source>
-        <translation>Caps Lock is aan</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.ui" line="517"/>
         <source>Please enter your mouse password</source>
-        <translation>Voer alstublieft uw muis-wachtwoord in</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.ui" line="524"/>
         <source>You entered the mouse password incorrectly too many times</source>
-        <translation>U heeft het muis-wachtwoord te vaak incorrect ingevoerd</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.ui" line="713"/>
         <source>Password</source>
-        <translation>Wachtwoord</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.ui" line="729"/>
         <source>Mouse Password</source>
-        <translation>Muis-wachtwoord</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.ui" line="839"/>
         <source>Switch Users</source>
-        <translation>Wissel van gebruiker</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.ui" line="855"/>
         <source>New Session</source>
-        <translation>Nieuwe sessie</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.ui" line="881"/>
         <source>Who do you want to switch to?</source>
-        <translation>Naar wie wilt u wisselen?</translation>
-    </message>
-    <message>
-        <location filename="../lockscreen.cpp" line="91"/>
-        <source>Unlock</source>
-        <translation>Ontgrendel</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="72"/>
@@ -90,52 +85,57 @@
         <location filename="../lockscreen.cpp" line="75"/>
         <location filename="../lockscreen.cpp" line="76"/>
         <source>Hello %1!</source>
-        <translation>Hallo %1!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="84"/>
         <source>Resume your session, continuing where you left off</source>
-        <translation>Hervat uw sessie en ga verder waar u gebleven bent</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="86"/>
         <source>Enter your password and resume your session, continuing where you left off</source>
-        <translation>Voer uw wachtwoord in en hervat uw sessie en ga verder waar u gebleven bent</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lockscreen.cpp" line="91"/>
+        <source>Unlock</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="311"/>
         <source>Mouse Password is disabled</source>
-        <translation>Mous-wachtwoord is uitgeschakeld</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="378"/>
         <source>Incorrect Password</source>
-        <translation>Incorrect wachtwoord</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="379"/>
         <source>The password you entered was incorrect. Please enter your password again.</source>
-        <translation>Het wachtwoord dat u heeft ingevoerd is incorrect. Voer uw wachtwoord alstublieft opnieuw in.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="547"/>
         <source>%1 on X11 display %2</source>
-        <translation>%1 op X11-scherm %2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="549"/>
         <source>on %1</source>
-        <translation>op %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="551"/>
         <source>%1 on VT #%2</source>
-        <translation>%1 op VT #%2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../lockscreen.cpp" line="553"/>
         <source>Session</source>
-        <translation>Sessie</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -143,22 +143,22 @@
     <message>
         <location filename="../timercomplete.ui" line="56"/>
         <source>Stop Timer</source>
-        <translation>Stop timer</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../timercomplete.ui" line="66"/>
         <source>Stops the timer from making sounds</source>
-        <translation>Laat de timer stoppen met geluid maken</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../timercomplete.ui" line="111"/>
         <source>Timer</source>
-        <translation>Timer</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../timercomplete.ui" line="123"/>
         <source>Time&apos;s up!</source>
-        <translation>De tijd is om!</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>
