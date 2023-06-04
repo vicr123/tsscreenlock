@@ -80,60 +80,60 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="72"/>
-        <location filename="../lockscreen.cpp" line="73"/>
+        <location filename="../lockscreen.cpp" line="74"/>
         <location filename="../lockscreen.cpp" line="75"/>
-        <location filename="../lockscreen.cpp" line="76"/>
+        <location filename="../lockscreen.cpp" line="77"/>
+        <location filename="../lockscreen.cpp" line="78"/>
         <source>Hello %1!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="84"/>
+        <location filename="../lockscreen.cpp" line="88"/>
         <source>Resume your session, continuing where you left off</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="86"/>
+        <location filename="../lockscreen.cpp" line="90"/>
         <source>Enter your password and resume your session, continuing where you left off</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="91"/>
+        <location filename="../lockscreen.cpp" line="95"/>
         <source>Unlock</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="311"/>
+        <location filename="../lockscreen.cpp" line="315"/>
         <source>Mouse Password is disabled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="378"/>
+        <location filename="../lockscreen.cpp" line="385"/>
         <source>Incorrect Password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="379"/>
+        <location filename="../lockscreen.cpp" line="386"/>
         <source>The password you entered was incorrect. Please enter your password again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="547"/>
+        <location filename="../lockscreen.cpp" line="551"/>
         <source>%1 on X11 display %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="549"/>
+        <location filename="../lockscreen.cpp" line="553"/>
         <source>on %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="551"/>
+        <location filename="../lockscreen.cpp" line="555"/>
         <source>%1 on VT #%2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../lockscreen.cpp" line="553"/>
+        <location filename="../lockscreen.cpp" line="557"/>
         <source>Session</source>
         <translation type="unfinished"></translation>
     </message>

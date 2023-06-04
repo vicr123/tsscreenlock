@@ -1,13 +1,13 @@
-#include "ui_lockscreen.h"
 #include "lockscreen.h"
+#include "ui_lockscreen.h"
 
-#include <Wm/desktopwm.h>
 #include <SystemSlide/systemslide.h>
+#include <Wm/desktopwm.h>
 
 struct LockScreenPrivate {
-    SystemSlide* slide;
-    QTimer* initialTimer;
-    QTimer* sleepTimer;
+        SystemSlide* slide;
+        QTimer* initialTimer;
+        QTimer* sleepTimer;
 };
 
 LockScreen::LockScreen(QWidget* parent) :
@@ -20,7 +20,7 @@ LockScreen::LockScreen(QWidget* parent) :
     QDBusInterface hostnamed("org.freedesktop.hostname1", "/org/freedesktop/hostname1", "org.freedesktop.hostname1", QDBusConnection::systemBus());
     ui->hostnameLabel->setText(hostnamed.property("PrettyHostname").toString());
 
-    connect(d->slide, &SystemSlide::deactivated, this, [ = ] {
+    connect(d->slide, &SystemSlide::deactivated, this, [=] {
         QString name = qgetenv("USER");
         if (name.isEmpty()) {
             name = qgetenv("USERNAME");
@@ -28,6 +28,8 @@ LockScreen::LockScreen(QWidget* parent) :
 
         QProcess* tscheckpass = new QProcess();
         tscheckpass->start("tscheckpass", {name});
+        tscheckpass->write("\n");
+        tscheckpass->closeWriteChannel();
         tscheckpass->waitForFinished();
         if (tscheckpass->exitCode() == 0) {
             QApplication::exit(0);
@@ -41,7 +43,7 @@ LockScreen::LockScreen(QWidget* parent) :
         connect(opacity, SIGNAL(finished()), opacity, SLOT(deleteLater()));
         opacity->start();
 
-        QTimer::singleShot(100, this, [ = ] {
+        QTimer::singleShot(100, this, [=] {
             ui->MouseUnderline->startAnimation();
             ui->PasswordUnderline->startAnimation();
         });
@@ -79,6 +81,8 @@ LockScreen::LockScreen(QWidget* parent) :
     QString description;
     QProcess* tscheckpass = new QProcess();
     tscheckpass->start("tscheckpass", {name});
+    tscheckpass->write("\n");
+    tscheckpass->closeWriteChannel();
     tscheckpass->waitForFinished();
     if (tscheckpass->exitCode() == 0) {
         description = tr("Resume your session, continuing where you left off");
@@ -109,22 +113,22 @@ LockScreen::LockScreen(QWidget* parent) :
 
     ui->MousePasswordPage->installEventFilter(this);
 
-    //Create an instance of DesktopWm
+    // Create an instance of DesktopWm
     DesktopWm::instance();
 
     d->initialTimer = new QTimer(this);
     d->initialTimer->setInterval(5000);
     d->initialTimer->setSingleShot(true);
-    connect(d->initialTimer, &QTimer::timeout, this, [ = ] {
-        //If there has been no activity for 4 seconds, turn off the screen
+    connect(d->initialTimer, &QTimer::timeout, this, [=] {
+        // If there has been no activity for 4 seconds, turn off the screen
         if (DesktopWm::msecsIdle() >= 4000) DesktopWm::setScreenOff(true);
     });
     d->initialTimer->start();
 
     d->sleepTimer = new QTimer(this);
     d->sleepTimer->setInterval(5000);
-    connect(d->sleepTimer, &QTimer::timeout, this, [ = ] {
-        //If the slide is active and there has been no activity for 60 seconds, turn off the screen
+    connect(d->sleepTimer, &QTimer::timeout, this, [=] {
+        // If the slide is active and there has been no activity for 60 seconds, turn off the screen
         if (!d->slide->isActive()) return;
         if (DesktopWm::isScreenOff()) return;
         if (DesktopWm::msecsIdle() >= 60000) DesktopWm::setScreenOff(true);
@@ -147,14 +151,14 @@ void LockScreen::showFullScreen() {
     anim->setEndValue(1.0);
     anim->setDuration(500);
     anim->setEasingCurve(QEasingCurve::OutCubic);
-    connect(anim, &tVariantAnimation::valueChanged, this, [ = ](QVariant value) {
+    connect(anim, &tVariantAnimation::valueChanged, this, [=](QVariant value) {
         this->setWindowOpacity(value.toReal());
     });
     connect(anim, SIGNAL(finished()), anim, SLOT(deleteLater()));
     anim->start();
 
     TimerNotificationDialog = new TimerComplete(this->geometry());
-    connect(TimerNotificationDialog, &TimerComplete::finished, this, [ = ] {
+    connect(TimerNotificationDialog, &TimerComplete::finished, this, [=] {
         QDBusMessage message = QDBusMessage::createMethodCall("org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "CloseNotification");
         QVariantList args;
         args.append(closeTimerId);
@@ -165,14 +169,14 @@ void LockScreen::showFullScreen() {
     int nonPasswordLoginTypes = 0;
     QFile mousePasswordFile(QDir::homePath() + "/.theshell/mousepassword");
     if (mousePasswordFile.exists()) {
-        //Enable Mouse Password pane
+        // Enable Mouse Password pane
         ui->mousePasswordButton->setVisible(true);
         nonPasswordLoginTypes++;
 
         mousePasswordFile.open(QFile::ReadOnly);
         mousePassword = mousePasswordFile.readAll().trimmed();
 
-        //Make sure a mouse is connected
+        // Make sure a mouse is connected
         bool mouseFound = false;
         if (QX11Info::isPlatformX11()) {
             int devicesCount;
@@ -188,17 +192,17 @@ void LockScreen::showFullScreen() {
         }
 
         if (mouseFound) {
-            //Go to Mouse Password frame
+            // Go to Mouse Password frame
             ui->loginStack->setCurrentIndex(1);
             ui->mousePasswordButton->setChecked(true);
         }
     } else {
-        //Don't allow the user to go to the Mouse Password frame
+        // Don't allow the user to go to the Mouse Password frame
         ui->mousePasswordButton->setVisible(false);
     }
 
     if (nonPasswordLoginTypes == 0) {
-        //Hide Password button since it is the only login method
+        // Hide Password button since it is the only login method
         ui->passwordButton->setVisible(false);
     }
 
@@ -313,7 +317,7 @@ void LockScreen::checkMousePassword() {
     } else {
         ui->mousePasswordEchoLabel->setText(QString(currentMousePassword.count(), QChar(0x2022 /* Bullet character */)));
         if (strcmp(crypt(currentMousePassword.data(), mousePassword.toLocal8Bit().data()), mousePassword.toLocal8Bit().data()) == 0) {
-            //Allow access
+            // Allow access
 
             if (QX11Info::isPlatformX11()) {
                 XUngrabKeyboard(QX11Info::display(), CurrentTime);
@@ -344,15 +348,16 @@ void LockScreen::on_goBackButton_clicked() {
 }
 
 void LockScreen::on_unlockButton_clicked() {
-    ui->password->setEnabled(false);
-    ui->unlockButton->setEnabled(false);
     QString name = qgetenv("USER");
     if (name.isEmpty()) {
         name = qgetenv("USERNAME");
     }
 
     QProcess tscheckpass;
-    tscheckpass.start("tscheckpass", {name, ui->password->text()});
+    tscheckpass.start("tscheckpass", {name});
+    tscheckpass.write(ui->password->text().toUtf8());
+    tscheckpass.write("\n");
+    tscheckpass.closeWriteChannel();
     tscheckpass.waitForFinished();
     if (tscheckpass.exitCode() == 0) {
         if (QX11Info::isPlatformX11()) {
@@ -371,7 +376,9 @@ void LockScreen::on_unlockButton_clicked() {
 
         QApplication::exit();
     } else {
-        QTimer::singleShot(1000, [ = ] {
+        ui->password->setEnabled(false);
+        ui->unlockButton->setEnabled(false);
+        QTimer::singleShot(1000, [=] {
             ui->password->setText("");
 
             tToast* toast = new tToast();
@@ -386,9 +393,6 @@ void LockScreen::on_unlockButton_clicked() {
         });
         return;
     }
-
-    ui->password->setEnabled(true);
-    ui->unlockButton->setEnabled(true);
 }
 
 void LockScreen::on_password_returnPressed() {
@@ -401,7 +405,7 @@ void LockScreen::showNotification(QString summary, QString body, uint id, QStrin
 
         closeTimerId = id;
     } else {
-        //TODO
+        // TODO
     }
 }
 
@@ -437,17 +441,17 @@ void LockScreen::animateClose() {
     opacity->setDuration(250);
     opacity->setEasingCurve(QEasingCurve::InCubic);
     connect(opacity, SIGNAL(finished()), opacity, SLOT(deleteLater()));
-    connect(opacity, &tPropertyAnimation::finished, [ = ] {
+    connect(opacity, &tPropertyAnimation::finished, [=] {
         tVariantAnimation* anim = new tVariantAnimation();
         anim->setStartValue((float) 1);
         anim->setEndValue((float) 0);
         anim->setDuration(250);
         anim->setEasingCurve(QEasingCurve::InCubic);
-        connect(anim, &tVariantAnimation::valueChanged, [ = ](QVariant value) {
+        connect(anim, &tVariantAnimation::valueChanged, [=](QVariant value) {
             this->setWindowOpacity(value.toFloat());
         });
         connect(anim, SIGNAL(finished()), anim, SLOT(deleteLater()));
-        connect(anim, &tVariantAnimation::finished, [ = ] {
+        connect(anim, &tVariantAnimation::finished, [=] {
             this->close();
         });
 
@@ -482,11 +486,11 @@ void LockScreen::on_SuspendButton_clicked() {
 }
 
 struct LoginSession {
-    QString sessionId;
-    uint userId;
-    QString username;
-    QString seat;
-    QDBusObjectPath path;
+        QString sessionId;
+        uint userId;
+        QString username;
+        QString seat;
+        QDBusObjectPath path;
 };
 Q_DECLARE_METATYPE(LoginSession)
 
@@ -505,7 +509,7 @@ const QDBusArgument& operator>>(const QDBusArgument& argument, LoginSession& ses
 }
 
 void LockScreen::on_switchUserButton_clicked() {
-    //Load available users
+    // Load available users
     QDBusInterface i("org.freedesktop.login1", "/org/freedesktop/login1/session/self", "org.freedesktop.login1.Session", QDBusConnection::systemBus());
     QString thisId = i.property("Id").toString();
 
